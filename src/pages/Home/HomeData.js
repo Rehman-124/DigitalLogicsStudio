@@ -67,13 +67,15 @@ const homeData = [
   {
     title: "🔀 Combinational Circuits",
     description:
-      "Explore encoders and decoders — the core combinational building blocks used in memory systems.",
+      "Explore encoders, decoders, multiplexers, and demultiplexers — the core combinational building blocks used in memory and data-routing systems.",
     section: "topics",
     topicGroup: "circuits",
     topicOrder: 1,
     links: [
       { text: "Encoder", to: "/encoder" },
       { text: "Decoder", to: "/decoder" },
+      { text: "Multiplexer", to: "/mux" },
+      { text: "Demultiplexer", to: "/demux" },
     ],
   },
   {

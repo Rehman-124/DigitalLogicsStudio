@@ -67,6 +67,8 @@ import ASCIINotation from "./pages/NumberSystems/ASCIINotation";
 // COMBINATIONAL CIRCUITS:
 import EncoderPage from "./pages/EncoderAndDecoder/encoder/EncoderPage";
 import DecoderPage from "./pages/EncoderAndDecoder/decoder/DecoderPage";
+import MuxPage from "./pages/MultiplexersAndDemultiplexers/mux/MuxPage";
+import DemuxPage from "./pages/MultiplexersAndDemultiplexers/demux/DemuxPage";
 
 // SEQUENTIAL CIRCUITS:
 import SeqIntro from "./pages/SequentialCircuits/SeqIntro";
@@ -171,10 +173,11 @@ function App() {
             path="/arithmetic/signed-unsigned"
             element={<SignedUnsignedArithmetic />}
           />
-
           {/* Combinational Circuits */}
           <Route path="/encoder" element={<EncoderPage />} />
           <Route path="/decoder" element={<DecoderPage />} />
+          <Route path="/mux" element={<MuxPage />} />
+          <Route path="/demux" element={<DemuxPage />} />
 
           {/* Sequential Circuits */}
           <Route path="/sequential/intro" element={<SeqIntro />} />
