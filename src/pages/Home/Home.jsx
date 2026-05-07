@@ -5,6 +5,7 @@ import Footer from "./Footer";
 import ArticleSection from "./ArticleSection";
 import homeData from "./HomeData";
 import { useTheme } from "../../context/ThemeContext";
+import ProblemsSection from "../Problems/ProblemsSection";
 import "./Home.css";
 
 const topicGroupOrder = {
@@ -22,10 +23,13 @@ const Home = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  const filteredData = homeData.filter(item =>
-    item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.links.some(link => link.text.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredData = homeData.filter(
+    (item) =>
+      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.links.some((link) =>
+        link.text.toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
   );
 
   const handleSearchSubmit = (event) => {
@@ -43,11 +47,7 @@ const Home = () => {
       const groupDiff =
         (topicGroupOrder[a.topicGroup] || 99) -
         (topicGroupOrder[b.topicGroup] || 99);
-
-      if (groupDiff !== 0) {
-        return groupDiff;
-      }
-
+      if (groupDiff !== 0) return groupDiff;
       return (a.topicOrder || 0) - (b.topicOrder || 0);
     });
 
@@ -94,28 +94,38 @@ const Home = () => {
                 sectionClassName="home-resource-section"
                 gridClassName="home-resource-grid"
               />
+
+              {/* ===== PROBLEMS SECTION ===== */}
+              <ProblemsSection />
             </>
           ) : (
-            <div className="no-results" style={{
-              textAlign: 'center',
-              padding: '4rem',
-              color: 'var(--secondary-text)',
-              background: 'var(--card-bg)',
-              borderRadius: '1rem',
-              border: '1px dashed var(--border-color)'
-            }}>
-              <p style={{ fontSize: '1.2rem' }}>🔍 No tools found matching "<strong>{searchTerm}</strong>"</p>
-              <button 
+            <div
+              className="no-results"
+              style={{
+                textAlign: "center",
+                padding: "4rem",
+                color: "var(--secondary-text)",
+                background: "var(--card-bg)",
+                borderRadius: "1rem",
+                border: "1px dashed var(--border-color)",
+              }}
+            >
+              <p style={{ fontSize: "1.2rem" }}>
+                🔍 No tools found matching "<strong>{searchTerm}</strong>"
+              </p>
+              <button
                 onClick={() => setSearchTerm("")}
                 style={{
-                  marginTop: '1rem',
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--accent-color)',
-                  cursor: 'pointer',
-                  textDecoration: 'underline'
+                  marginTop: "1rem",
+                  background: "none",
+                  border: "none",
+                  color: "var(--accent-color)",
+                  cursor: "pointer",
+                  textDecoration: "underline",
                 }}
-              >Clear search</button>
+              >
+                Clear search
+              </button>
             </div>
           )}
         </div>

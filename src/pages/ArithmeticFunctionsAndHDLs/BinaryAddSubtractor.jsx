@@ -8,6 +8,7 @@ import {
   binaryAdd,
   binarySubtract,
 } from "../../utils/arithmeticHelpers";
+import CircuitModal from "../../components/CircuitModal";
 
 /* ── HELPERS ──────────────────────────────────────────────── */
 const pad = (a, b) => {
@@ -100,6 +101,7 @@ const BinaryAddSubtractor = () => {
   const [quizScore, setQuizScore] = useState(0);
   const [quizDone, setQuizDone] = useState(false);
   const [showOverflow, setShowOverflow] = useState(false);
+  const [showCircuitModal, setShowCircuitModal] = useState(false);
 
   const cleanA = cleanBin(a) || "0";
   const cleanB = cleanBin(b) || "0";
@@ -469,10 +471,7 @@ const BinaryAddSubtractor = () => {
             note: "",
           },
         ].map(({ label, val, color, note }) => (
-          <div
-            key={label}
-            style={S.interactiveRow}
-          >
+          <div key={label} style={S.interactiveRow}>
             <span style={{ color: "var(--afhdl-muted)", fontSize: "0.82rem" }}>
               {label}
             </span>
@@ -481,7 +480,9 @@ const BinaryAddSubtractor = () => {
             >
               <strong style={{ color, fontFamily: "monospace" }}>{val}</strong>
               {note && (
-                <span style={{ fontSize: "0.72rem", color: "var(--afhdl-muted)" }}>
+                <span
+                  style={{ fontSize: "0.72rem", color: "var(--afhdl-muted)" }}
+                >
                   {note}
                 </span>
               )}
@@ -821,7 +822,8 @@ const BinaryAddSubtractor = () => {
       {showHDL && (
         <div style={S.card}>
           <div style={S.codeBlock}>
-            <AFHDLCopyButton text={`// 4-bit Adder/Subtractor in Verilog
+            <AFHDLCopyButton
+              text={`// 4-bit Adder/Subtractor in Verilog
 // Mode=0 → A + B
 // Mode=1 → A - B  (using 2's complement of B)
 
@@ -842,8 +844,9 @@ module adder_subtractor (
   assign sum         = A + B_modified + Mode;
   assign Result      = sum[3:0];
   assign Carry_Borrow = sum[4];
-endmodule`} />
-          <pre
+endmodule`}
+            />
+            <pre
               style={{
                 margin: 0,
                 color: "#e2e8f0",
@@ -1072,6 +1075,51 @@ endmodule`}</pre>
           )}
         </div>
       )}
+
+      {/* ══ VISUALIZE CIRCUIT ═════════════════════════════════ */}
+      <div style={S.card}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.6rem",
+            marginBottom: "0.5rem",
+          }}
+        >
+          <span style={{ fontSize: "1.3rem" }}>🔌</span>
+          <div>
+            <div
+              style={{ fontWeight: 700, color: "#f8fafc", fontSize: "0.95rem" }}
+            >
+              Visualize the Adder/Subtractor Circuit
+            </div>
+            <div
+              style={{
+                color: "#94a3b8",
+                fontSize: "0.8rem",
+                marginTop: "0.15rem",
+              }}
+            >
+              Open the interactive logic gate editor showing the XOR-controlled
+              mode circuit.
+            </div>
+          </div>
+        </div>
+        <button
+          className="kmap-btn kmap-btn-primary kmap-btn-full"
+          onClick={() => setShowCircuitModal(true)}
+          style={{ width: "100%", marginTop: "0.25rem" }}
+        >
+          🔌 Visualize Circuit
+        </button>
+      </div>
+
+      <CircuitModal
+        open={showCircuitModal}
+        onClose={() => setShowCircuitModal(false)}
+        expression={"S = A⊕B⊕M"}
+        variables={["A", "B", "M"]}
+      />
     </AFHDLLayout>
   );
 };

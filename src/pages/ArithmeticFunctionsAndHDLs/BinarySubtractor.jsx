@@ -4,6 +4,7 @@ import AFHDLCopyButton from "./components/AFHDLCopyButton";
 import AFHDLLayout from "./components/AFHDLLayout";
 import { afhdlTheme as S } from "./utils/afhdlTheme";
 import { cleanBin, binarySubtract } from "../../utils/arithmeticHelpers";
+import CircuitModal from "../../components/CircuitModal";
 
 /* ── HELPERS ──────────────────────────────────────────────── */
 const pad = (a, b) => {
@@ -962,6 +963,8 @@ const BinarySubtractor = () => {
   const [quizDone, setQuizDone] = useState(false);
   const [twosStep, setTwosStep] = useState(0);
   const [activeTab, setActiveTab] = useState("borrow"); // "borrow" | "twos"
+  const [showCircuitModal, setShowCircuitModal] = useState(false);
+  const [circuitModalTarget, setCircuitModalTarget] = useState("half"); // "half" | "full"
 
   const cleanA = cleanBin(a) || "0";
   const cleanB = cleanBin(b) || "0";
@@ -2004,6 +2007,20 @@ const BinarySubtractor = () => {
                   : " ← no borrow needed"}
               </div>
             )}
+
+            {/* Visualize Half Subtractor Circuit */}
+            <div style={{ marginTop: "1rem" }}>
+              <button
+                className="kmap-btn kmap-btn-primary kmap-btn-full"
+                style={{ width: "100%" }}
+                onClick={() => {
+                  setCircuitModalTarget("half");
+                  setShowCircuitModal(true);
+                }}
+              >
+                🔌 Visualize Half Subtractor Circuit
+              </button>
+            </div>
           </>
         )}
 
@@ -2128,6 +2145,20 @@ const BinarySubtractor = () => {
             >
               Step {twosStep + 1} of {TWOS_STEPS.length}
             </p>
+
+            {/* Visualize Full Subtractor Circuit */}
+            <div style={{ marginTop: "1rem" }}>
+              <button
+                className="kmap-btn kmap-btn-primary kmap-btn-full"
+                style={{ width: "100%" }}
+                onClick={() => {
+                  setCircuitModalTarget("full");
+                  setShowCircuitModal(true);
+                }}
+              >
+                🔌 Visualize Full Subtractor Circuit
+              </button>
+            </div>
           </>
         )}
       </div>
@@ -2559,6 +2590,68 @@ endmodule`}
           )}
         </div>
       )}
+
+      {/* ══ VISUALIZE CIRCUIT ═════════════════════════════════ */}
+      <div style={S.card}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.6rem",
+            marginBottom: "0.5rem",
+          }}
+        >
+          <span style={{ fontSize: "1.3rem" }}>🔌</span>
+          <div>
+            <div
+              style={{ fontWeight: 700, color: "#f8fafc", fontSize: "0.95rem" }}
+            >
+              Visualize Subtractor Circuits
+            </div>
+            <div
+              style={{
+                color: "#94a3b8",
+                fontSize: "0.8rem",
+                marginTop: "0.15rem",
+              }}
+            >
+              Open the interactive logic gate editor for Half or Full
+              Subtractor.
+            </div>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.25rem" }}>
+          <button
+            className="kmap-btn kmap-btn-primary"
+            onClick={() => {
+              setCircuitModalTarget("half");
+              setShowCircuitModal(true);
+            }}
+            style={{ flex: 1 }}
+          >
+            🔌 Half Subtractor
+          </button>
+          <button
+            className="kmap-btn kmap-btn-primary"
+            onClick={() => {
+              setCircuitModalTarget("full");
+              setShowCircuitModal(true);
+            }}
+            style={{ flex: 1 }}
+          >
+            🔌 Full Subtractor
+          </button>
+        </div>
+      </div>
+
+      <CircuitModal
+        open={showCircuitModal}
+        onClose={() => setShowCircuitModal(false)}
+        expression={circuitModalTarget === "half" ? "D = A⊕B" : "D = A⊕B⊕Bin"}
+        variables={
+          circuitModalTarget === "half" ? ["A", "B"] : ["A", "B", "Bin"]
+        }
+      />
     </AFHDLLayout>
   );
 };

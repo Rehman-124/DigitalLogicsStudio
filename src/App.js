@@ -67,6 +67,8 @@ import ASCIINotation from "./pages/NumberSystems/ASCIINotation";
 // COMBINATIONAL CIRCUITS:
 import EncoderPage from "./pages/EncoderAndDecoder/encoder/EncoderPage";
 import DecoderPage from "./pages/EncoderAndDecoder/decoder/DecoderPage";
+import MuxPage from "./pages/MultiplexersAndDemultiplexers/mux/MuxPage";
+import DemuxPage from "./pages/MultiplexersAndDemultiplexers/demux/DemuxPage";
 
 // SEQUENTIAL CIRCUITS:
 import SeqIntro from "./pages/SequentialCircuits/SeqIntro";
@@ -86,6 +88,8 @@ import RandomAccessMemory from "./pages/Memory/RandomAccessMemory";
 import StaticDynamicRAM from "./pages/Memory/StaticDynamicRAM";
 import ArrayOfRAMICs from "./pages/Memory/ArrayOfRAMICs";
 import MemoryConstructionRAM from "./pages/Memory/MemoryConstructionRAM";
+import DLDTrainerBoard from "./pages/TrainerBoard";
+import { Analytics } from "@vercel/analytics/react";
 
 function App() {
   const { theme } = useTheme();
@@ -93,6 +97,7 @@ function App() {
   return (
     <div className={`app-root ${theme}`}>
       <BrowserRouter>
+        <Analytics />
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Home />} />
@@ -170,10 +175,11 @@ function App() {
             path="/arithmetic/signed-unsigned"
             element={<SignedUnsignedArithmetic />}
           />
-
           {/* Combinational Circuits */}
           <Route path="/encoder" element={<EncoderPage />} />
           <Route path="/decoder" element={<DecoderPage />} />
+          <Route path="/mux" element={<MuxPage />} />
+          <Route path="/demux" element={<DemuxPage />} />
 
           {/* Sequential Circuits */}
           <Route path="/sequential/intro" element={<SeqIntro />} />
@@ -228,6 +234,7 @@ function App() {
             path="/memory/random-access-memory"
             element={<RandomAccessMemory />}
           />
+          <Route path="/trainer-board" element={<DLDTrainerBoard />} />
           <Route
             path="/memory/static-dynamic-ram"
             element={<StaticDynamicRAM />}

@@ -3,6 +3,7 @@ import AFHDLDivider from "./components/AFHDLDivider";
 import AFHDLCopyButton from "./components/AFHDLCopyButton";
 import AFHDLLayout from "./components/AFHDLLayout";
 import { afhdlTheme as S } from "./utils/afhdlTheme";
+import CircuitModal from "../../components/CircuitModal";
 import {
   cleanBin,
   halfAdder,
@@ -176,6 +177,8 @@ const BinaryAdders = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [teacherNoteIdx, setTeacherNoteIdx] = useState(0);
   const [showHint, setShowHint] = useState(false);
+  const [showCircuitModal, setShowCircuitModal] = useState(false);
+  const [circuitModalTarget, setCircuitModalTarget] = useState("half"); // "half" | "full"
 
   const cleanA = cleanBin(a) || "0";
   const cleanB = cleanBin(b) || "0";
@@ -909,6 +912,20 @@ const BinaryAdders = () => {
               carry from the previous column. Half Adders are only used for the
               very first (rightmost) bit!
             </div>
+
+            {/* Visualize Half Adder Circuit */}
+            <div style={{ marginTop: "1rem" }}>
+              <button
+                className="kmap-btn kmap-btn-primary kmap-btn-full"
+                style={{ width: "100%" }}
+                onClick={() => {
+                  setCircuitModalTarget("half");
+                  setShowCircuitModal(true);
+                }}
+              >
+                🔌 Visualize Half Adder Circuit
+              </button>
+            </div>
           </div>
         )}
 
@@ -1057,6 +1074,20 @@ const BinaryAdders = () => {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Visualize Full Adder Circuit */}
+            <div style={{ marginTop: "1rem" }}>
+              <button
+                className="kmap-btn kmap-btn-primary kmap-btn-full"
+                style={{ width: "100%" }}
+                onClick={() => {
+                  setCircuitModalTarget("full");
+                  setShowCircuitModal(true);
+                }}
+              >
+                🔌 Visualize Full Adder Circuit
+              </button>
             </div>
           </div>
         )}
@@ -1387,7 +1418,9 @@ const BinaryAdders = () => {
                   >
                     {row.P}
                   </span>
-                  <span style={{ fontSize: "0.7rem", color: "var(--afhdl-muted)" }}>
+                  <span
+                    style={{ fontSize: "0.7rem", color: "var(--afhdl-muted)" }}
+                  >
                     {row.G
                       ? "🔴 creates carry"
                       : row.P
@@ -1789,6 +1822,56 @@ endmodule`}</pre>
           )}
         </div>
       )}
+
+      {/* ══ VISUALIZE CIRCUIT ═════════════════════════════════ */}
+      <div style={S.card}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.6rem",
+            marginBottom: "0.5rem",
+          }}
+        >
+          <span style={{ fontSize: "1.3rem" }}>🔌</span>
+          <div>
+            <div
+              style={{ fontWeight: 700, color: "#f8fafc", fontSize: "0.95rem" }}
+            >
+              Visualize the Adder Circuit
+            </div>
+            <div
+              style={{
+                color: "#94a3b8",
+                fontSize: "0.8rem",
+                marginTop: "0.15rem",
+              }}
+            >
+              Open the interactive logic gate editor with the Full Adder
+              expression pre-loaded.
+            </div>
+          </div>
+        </div>
+        <button
+          className="kmap-btn kmap-btn-primary kmap-btn-full"
+          onClick={() => {
+            setCircuitModalTarget("full");
+            setShowCircuitModal(true);
+          }}
+          style={{ width: "100%", marginTop: "0.25rem" }}
+        >
+          🔌 Visualize Full Adder Circuit
+        </button>
+      </div>
+
+      <CircuitModal
+        open={showCircuitModal}
+        onClose={() => setShowCircuitModal(false)}
+        expression={circuitModalTarget === "half" ? "S = A⊕B" : "S = A⊕B⊕Cin"}
+        variables={
+          circuitModalTarget === "half" ? ["A", "B"] : ["A", "B", "Cin"]
+        }
+      />
     </AFHDLLayout>
   );
 };
