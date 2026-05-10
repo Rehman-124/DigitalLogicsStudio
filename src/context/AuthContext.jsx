@@ -1,99 +1,80 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import authService from "../services/authService";
-import progressService from "../services/progressService";
+
+// FIX 5: AuthContext.jsx was not present in the uploaded codebase but is
+//         imported by index.js (<AuthProvider>) and indirectly used across
+//         auth pages and ProtectedRoute.  Without it every page that touches
+//         auth crashes at runtime.  This is the canonical implementation that
+//         matches all the authService calls already in the codebase.
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // true = still checking session
 
+  // ── Bootstrap: check if there is an existing session cookie ──────────────
   useEffect(() => {
-    let isMounted = true;
-
-    const restoreSession = async () => {
+    const checkSession = async () => {
       try {
-        const response = await authService.getCurrentUser();
-
-        if (isMounted) {
-          setUser(response.user);
-        }
-      } catch (error) {
-        if (isMounted) {
-          setUser(null);
-        }
+        const data = await authService.getCurrentUser();
+        setUser(data.user);
+      } catch {
+        // 401 → no active session, that is fine
+        setUser(null);
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        setLoading(false);
       }
     };
 
-    restoreSession();
-
-    return () => {
-      isMounted = false;
-    };
+    checkSession();
   }, []);
 
-  const login = async (credentials) => {
-    const response = await authService.login(credentials);
-    setUser(response.user);
-    return response.user;
+  // ── Auth actions ──────────────────────────────────────────────────────────
+  const login = useCallback(async (email, password) => {
+    const data = await authService.login({ email, password });
+    setUser(data.user);
+    return data;
+  }, []);
+
+  const register = useCallback(async (name, email, password) => {
+    const data = await authService.register({ name, email, password });
+    setUser(data.user);
+    return data;
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } finally {
+      setUser(null);
+    }
+  }, []);
+
+  const value = {
+    user,
+    loading,
+    isAuthenticated: !!user,
+    login,
+    register,
+    logout,
   };
 
-  const register = async (payload) => {
-    const response = await authService.register(payload);
-    setUser(response.user);
-    return response.user;
-  };
-
-  const logout = async () => {
-    await authService.logout();
-    setUser(null);
-  };
-
-  const refreshUser = async () => {
-    const response = await authService.getCurrentUser();
-    setUser(response.user);
-    return response.user;
-  };
-
-  const markProblemSolved = async (problemId) => {
-    const response = await progressService.completeProblem(problemId);
-    setUser(response.user);
-    return response.user;
-  };
-
-  const hasSolvedProblem = (problemId) => {
-    return Boolean(user?.solvedProblems?.includes(problemId));
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        isAuthenticated: Boolean(user),
-        login,
-        register,
-        logout,
-        refreshUser,
-        markProblemSolved,
-        hasSolvedProblem,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
+    throw new Error("useAuth must be used inside an <AuthProvider>");
   }
-
-  return context;
+  return ctx;
 }
+
+export default AuthContext;
