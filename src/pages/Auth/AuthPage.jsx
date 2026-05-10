@@ -10,46 +10,24 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function getInitialForm(mode) {
   if (mode === "signup") {
-    return {
-      name: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    };
+    return { name: "", email: "", password: "", confirmPassword: "" };
   }
-
-  return {
-    email: "",
-    password: "",
-  };
+  return { email: "", password: "" };
 }
 
 function validateForm(mode, values) {
   if (mode === "signup") {
-    if (!values.name.trim()) {
-      return "Please enter your full name.";
-    }
-
-    if (values.name.trim().length < 2) {
+    if (!values.name.trim()) return "Please enter your full name.";
+    if (values.name.trim().length < 2)
       return "Name must be at least 2 characters long.";
-    }
   }
 
-  if (!values.email.trim()) {
-    return "Please enter your email address.";
-  }
-
-  if (!emailPattern.test(values.email.trim())) {
+  if (!values.email.trim()) return "Please enter your email address.";
+  if (!emailPattern.test(values.email.trim()))
     return "Please enter a valid email address.";
-  }
-
-  if (!values.password) {
-    return "Please enter your password.";
-  }
-
-  if (values.password.length < 8) {
+  if (!values.password) return "Please enter your password.";
+  if (values.password.length < 8)
     return "Password must be at least 8 characters long.";
-  }
 
   if (mode === "signup" && values.password !== values.confirmPassword) {
     return "Passwords do not match.";
@@ -60,7 +38,9 @@ function validateForm(mode, values) {
 
 export default function AuthPage({ mode }) {
   const isSignup = mode === "signup";
-  const [formValues, setFormValues] = React.useState(() => getInitialForm(mode));
+  const [formValues, setFormValues] = React.useState(() =>
+    getInitialForm(mode),
+  );
   const [formError, setFormError] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { theme, toggle: toggleTheme } = useTheme();
@@ -75,22 +55,14 @@ export default function AuthPage({ mode }) {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-
-    setFormValues((currentValues) => ({
-      ...currentValues,
-      [name]: value,
-    }));
-
-    if (formError) {
-      setFormError("");
-    }
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+    if (formError) setFormError("");
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     const validationError = validateForm(mode, formValues);
-
     if (validationError) {
       setFormError(validationError);
       return;
@@ -118,19 +90,23 @@ export default function AuthPage({ mode }) {
         });
         navigate(redirectTo, {
           replace: true,
-          state: {
-            authMessage: `Welcome back, ${loggedInUser.name}.`,
-          },
+          state: { authMessage: `Welcome back, ${loggedInUser.name}.` },
         });
       }
     } catch (error) {
-      if (!error.response) {
+      // BUG FIX: The old catch block checked error.response which doesn't exist
+      // when Axios has already extracted the message via the response interceptor
+      // in apiClient.js.  Now we just use error.message directly, which works
+      // whether the error came from the network layer or the API.
+      const isNetworkError = !error.response && !error.status;
+
+      if (isNetworkError) {
         setFormError(
-          "Cannot reach the backend server right now. Make sure the backend is running on port 5000.",
+          "Cannot reach the server. Please check your connection and try again.",
         );
       } else {
         setFormError(
-          error.response?.data?.message ||
+          error.message ||
             `Unable to ${isSignup ? "create your account" : "log you in"} right now.`,
         );
       }
