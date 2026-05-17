@@ -8,6 +8,8 @@ const packageJson = require("../package.json");
 const routesPath = path.resolve(__dirname, "..", "react-snap-routes.json");
 const buildDir = path.resolve(__dirname, "..", "build");
 const defaultPort = Number.parseInt(process.env.PRERENDER_PORT || "45678", 10);
+const isVercel = Boolean(process.env.VERCEL);
+const requirePrerender = process.env.PRERENDER_REQUIRED === "true";
 
 const loadIncludeRoutes = () => {
   if (!fs.existsSync(routesPath)) {
@@ -56,6 +58,15 @@ const writeSnapshot = (route, html) => {
   const outputPath = resolveOutputPath(route);
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, ensureHtml(html), "utf8");
+};
+
+const writeSpaFallbackFiles = () => {
+  const indexPath = path.join(buildDir, "index.html");
+  if (!fs.existsSync(indexPath)) return;
+
+  const rootHtml = fs.readFileSync(indexPath, "utf8");
+  fs.writeFileSync(path.join(buildDir, "200.html"), rootHtml, "utf8");
+  fs.writeFileSync(path.join(buildDir, "404.html"), rootHtml, "utf8");
 };
 
 const createServer = () => {
@@ -171,9 +182,7 @@ async function main() {
       await Promise.all(chunk.map((route) => prerenderRoute(browser, baseUrl, route)));
     }
 
-    const rootHtml = fs.readFileSync(path.join(buildDir, "index.html"), "utf8");
-    fs.writeFileSync(path.join(buildDir, "200.html"), rootHtml, "utf8");
-    fs.writeFileSync(path.join(buildDir, "404.html"), rootHtml, "utf8");
+    writeSpaFallbackFiles();
   } finally {
     await browser.close();
     await new Promise((resolve, reject) => {
@@ -191,5 +200,14 @@ async function main() {
 
 main().catch((error) => {
   console.error("Prerender failed:", error);
+
+  if (isVercel && !requirePrerender) {
+    writeSpaFallbackFiles();
+    console.warn(
+      "Skipping prerender failure on Vercel. Set PRERENDER_REQUIRED=true to make this fatal.",
+    );
+    process.exit(0);
+  }
+
   process.exit(1);
 });
