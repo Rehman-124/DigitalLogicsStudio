@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ToolLayout from '../components/ToolLayout';
+import AdvancedLogicLayout from './AdvancedLogic/AdvancedLogicLayout';
 import ExplanationBlock from '../components/ExplanationBlock';
 import InteractiveDemo from '../components/InteractiveDemo';
 import CircuitModal from '../components/CircuitModal';
@@ -52,9 +52,24 @@ const OddFunction = () => {
   ];
 
   return (
-    <ToolLayout 
+    <AdvancedLogicLayout
       title="Odd Function (3-Variable XOR)" 
       subtitle="Understanding XOR with three variables and parity detection"
+      intro="Study the odd function inside the shared premium advanced-logic shell, connecting parity detection, XOR behavior, and implementation strategy."
+      highlights={[
+        {
+          title: "Parity Detection",
+          text: "Map output behavior directly to the count of active logic-high inputs.",
+        },
+        {
+          title: "Equivalent Forms",
+          text: "Compare SOP, POS, and cascaded XOR implementations of the same function.",
+        },
+        {
+          title: "Interactive Behavior",
+          text: "Flip live inputs and watch parity and XOR outputs stay perfectly aligned.",
+        },
+      ]}
     >
       <div className="kmap-card" style={{ marginBottom: '1rem' }}>
         <button
@@ -683,7 +698,7 @@ const OddFunction = () => {
           }
         }
       `}</style>
-    </ToolLayout>
+    </AdvancedLogicLayout>
   );
 };
 

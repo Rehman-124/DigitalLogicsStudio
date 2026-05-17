@@ -16,6 +16,7 @@
  *   8. Quiz
  */
 import React, { useState } from "react";
+import CombinationalLayout from "../../CombinationalCircuits/CombinationalLayout";
 
 // ── Shared components ──────────────────────────────────────────────────────────
 import Section from "../shared/components/Section.jsx";
@@ -87,22 +88,33 @@ const DecoderPage = () => {
   };
 
   return (
-    <div
-      style={{
-        padding: "24px",
-        maxWidth: "900px",
-        margin: "0 auto",
-        fontFamily: "system-ui, sans-serif",
-      }}
+    <CombinationalLayout
+      title="Decoder"
+      subtitle="One-hot expansion, minterm generation, and hardware selection"
+      intro="Follow a guided decoder path that turns binary inputs into uniquely activated outputs for addressing, display control, and logic generation."
+      highlights={[
+        {
+          title: "One-Hot Activation",
+          text: "See how each binary combination maps to exactly one asserted output line.",
+        },
+        {
+          title: "Function Generation",
+          text: "Use decoder outputs as ready-made minterms for building larger Boolean functions.",
+        },
+        {
+          title: "Applied Routing",
+          text: "Connect decoder behavior to memory selection, display drivers, and CPU control.",
+        },
+      ]}
     >
-      <h1 style={{ color: "#e2e8f0", marginBottom: "8px", fontSize: "1.6rem" }}>
-        🔓 Binary Decoders
-      </h1>
-      <p style={{ color: "#9ca3af", marginBottom: "32px", lineHeight: "1.65" }}>
-        A decoder converts a binary code to a unique one-hot output. Explore the
-        interactive simulator, Boolean equations, and real-world applications
-        below.
-      </p>
+      <div
+        style={{
+          padding: "4px 0 0",
+          maxWidth: "900px",
+          margin: "0 auto",
+          fontFamily: "system-ui, sans-serif",
+        }}
+      >
 
       {/* ── 1: Concept & Minterm Explorer ── */}
       <Section title="🧠 What Is a Decoder?" accent="#6366f1">
@@ -266,6 +278,7 @@ const DecoderPage = () => {
       {/* Floating tips button */}
       <TipsPanel tips={DECODER_TIPS} />
     </div>
+    </CombinationalLayout>
   );
 };
 

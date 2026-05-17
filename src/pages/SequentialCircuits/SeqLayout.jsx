@@ -1,56 +1,64 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
-import {
-  BookOpen,
-  Lock,
-  ToggleRight,
-  Layers,
-  Microscope,
-  Blocks,
-  Waypoints,
-  Zap,
-} from "lucide-react";
-import './SeqLayout.css';
-import SeqTopbar from "./components/SeqTopbar";
-import SeqSidebar from "./components/SeqSidebar";
-import SeqMain from "./components/SeqMain";
+import React from "react";
+import PremiumLearningShell from "../../components/topics/PremiumLearningShell";
+import "./SeqLayout.css";
 
 const seqPages = [
-  { path: "/sequential/intro", label: "Introduction", icon: <BookOpen size={18} />, short: "Intro" },
-  { path: "/sequential/latches", label: "Latches", icon: <Lock size={18} />, short: "Latches" },
-  { path: "/sequential/flip-flops", label: "Flip-Flops", icon: <ToggleRight size={18} />, short: "Flip-Flops" },
-  { path: "/sequential/flip-flop-types", label: "Types of Flip-Flops", icon: <Layers size={18} />, short: "FF Types" },
-  { path: "/sequential/analysis", label: "Analysis", icon: <Microscope size={18} />, short: "Analysis" },
-  { path: "/sequential/design-procedures", label: "Design Procedures", icon: <Blocks size={18} />, short: "Design" },
-  { path: "/sequential/state-diagram", label: "State Diagrams & Tables", icon: <Waypoints size={18} />, short: "States" },
-  { path: "/sequential/state-reduction", label: "State Reduction & Excitation", icon: <Zap size={18} />, short: "Reduction" },
+  {
+    path: "/sequential/intro",
+    label: "Introduction",
+    description: "Core sequential-circuit ideas, memory, and timing behavior.",
+  },
+  {
+    path: "/sequential/latches",
+    label: "Latches",
+    description: "SR and gated latches as the first state-holding building blocks.",
+  },
+  {
+    path: "/sequential/flip-flops",
+    label: "Flip-Flops",
+    description: "Edge-triggered memory elements and their timing semantics.",
+  },
+  {
+    path: "/sequential/flip-flop-types",
+    label: "Flip-Flop Types",
+    description: "Compare SR, JK, D, and T flip-flops with design tradeoffs.",
+  },
+  {
+    path: "/sequential/analysis",
+    label: "Analysis",
+    description: "Derive state behavior from equations, excitation, and transitions.",
+  },
+  {
+    path: "/sequential/design-procedures",
+    label: "Design Procedures",
+    description: "Structured workflows for building sequential systems correctly.",
+  },
+  {
+    path: "/sequential/state-diagram",
+    label: "State Diagrams",
+    description: "Translate between states, transitions, tables, and behavior.",
+  },
+  {
+    path: "/sequential/state-reduction",
+    label: "State Reduction",
+    description: "Minimize states and compute efficient excitation requirements.",
+  },
 ];
 
-const SeqLayout = ({ children, title, subtitle }) => {
-  const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const currentIndex = seqPages.findIndex((p) => p.path === location.pathname);
-  const prev = seqPages[currentIndex - 1];
-  const next = seqPages[currentIndex + 1];
-  const progress = Math.round(((currentIndex + 1) / seqPages.length) * 100);
-
-  return (
-    <div className="seq-layout" data-component="sequential-layout">
-      <div className="seq-bg-blob seq-bg-blob-1" />
-      <div className="seq-bg-blob seq-bg-blob-2" />
-      <div className="seq-bg-blob seq-bg-blob-3" />
-
-      <SeqTopbar seqPages={seqPages} currentIndex={currentIndex} progress={progress} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
-      <div className="seq-body">
-        {sidebarOpen && <div className="seq-overlay" onClick={() => setSidebarOpen(false)} />}
-
-        <SeqSidebar seqPages={seqPages} currentIndex={currentIndex} progress={progress} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-
-        <SeqMain seqPages={seqPages} currentIndex={currentIndex} prev={prev} next={next} title={title} subtitle={subtitle} children={children} />
-      </div>
-    </div>
-  );
-};
+const SeqLayout = ({ children, title, subtitle }) => (
+  <PremiumLearningShell
+    title={title}
+    subtitle={subtitle}
+    pages={seqPages}
+    topicLabel="Sequential Circuits"
+    sidebarTitle="Sequential Circuits"
+    sidebarCopy="Follow one state-logic chapter at a time with the same premium learning path used across the platform."
+    heroKicker="Sequential Circuits"
+    progressVerb="complete"
+    rootClassName="seq-layout"
+  >
+    {children}
+  </PremiumLearningShell>
+);
 
 export default SeqLayout;

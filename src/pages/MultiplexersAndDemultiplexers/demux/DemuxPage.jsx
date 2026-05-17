@@ -8,6 +8,7 @@
  * Contains no rendering logic itself.
  */
 import React, { useState } from "react";
+import CombinationalLayout from "../../CombinationalCircuits/CombinationalLayout";
 import { COLORS } from "../shared/theme.js";
 import Section from "../shared/components/Section.jsx";
 import Quiz from "../shared/components/Quiz.jsx";
@@ -26,19 +27,26 @@ const DemuxPage = () => {
   const config = DEMUX_TYPES[selectedType];
 
   return (
-    <div style={{ maxWidth: "900px", margin: "0 auto", padding: "32px 20px", fontFamily: "inherit" }}>
-
-      {/* Page header */}
-      <div style={{ marginBottom: "32px" }}>
-        <h1 style={{ color: COLORS.textPrimary, fontSize: "1.8rem", fontWeight: "800", margin: 0 }}>
-          🔀 Demultiplexers (DEMUX)
-        </h1>
-        <p style={{ color: COLORS.textSecondary, marginTop: "8px", lineHeight: "1.6", fontSize: "0.95rem" }}>
-          A demultiplexer routes a single input signal to one of many outputs, selected by
-          binary select lines. It is the functional inverse of a multiplexer — distributing
-          one signal across multiple destinations.
-        </p>
-      </div>
+    <CombinationalLayout
+      title="Demultiplexer"
+      subtitle="One-to-many distribution, select control, and decoder equivalence"
+      intro="Learn how a single input signal can be directed across multiple destinations with select-line control and how that behavior mirrors decoder hardware."
+      highlights={[
+        {
+          title: "One-to-Many Routing",
+          text: "Track how one source reaches exactly one selected destination output.",
+        },
+        {
+          title: "Decoder Relationship",
+          text: "Compare DEMUX behavior directly with decoder enable-driven architectures.",
+        },
+        {
+          title: "Interactive Selection",
+          text: "Toggle data and select inputs to build intuition for distribution logic.",
+        },
+      ]}
+    >
+      <div style={{ maxWidth: "900px", margin: "0 auto", fontFamily: "inherit" }}>
 
       {/* Type selector */}
       <DemuxTypeSelector
@@ -86,6 +94,7 @@ const DemuxPage = () => {
 
       <TipsPanel tips={DEMUX_TIPS} />
     </div>
+    </CombinationalLayout>
   );
 };
 

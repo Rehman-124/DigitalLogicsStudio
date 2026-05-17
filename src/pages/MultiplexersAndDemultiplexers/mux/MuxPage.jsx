@@ -8,6 +8,7 @@
  * Contains no rendering logic itself.
  */
 import React, { useState } from "react";
+import CombinationalLayout from "../../CombinationalCircuits/CombinationalLayout";
 import { COLORS } from "../shared/theme.js";
 import Section from "../shared/components/Section.jsx";
 import Quiz from "../shared/components/Quiz.jsx";
@@ -27,18 +28,26 @@ const MuxPage = () => {
   const config = MUX_TYPES[selectedType];
 
   return (
-    <div style={{ maxWidth: "900px", margin: "0 auto", padding: "32px 20px", fontFamily: "inherit" }}>
-
-      {/* Page header */}
-      <div style={{ marginBottom: "32px" }}>
-        <h1 style={{ color: COLORS.textPrimary, fontSize: "1.8rem", fontWeight: "800", margin: 0 }}>
-          ⚙️ Multiplexers (MUX)
-        </h1>
-        <p style={{ color: COLORS.textSecondary, marginTop: "8px", lineHeight: "1.6", fontSize: "0.95rem" }}>
-          A multiplexer selects one of many input signals and forwards it to a single output.
-          It uses select lines to determine which input is routed — acting like a digitally controlled switch.
-        </p>
-      </div>
+    <CombinationalLayout
+      title="Multiplexer"
+      subtitle="Signal selection, routing control, and logic implementation"
+      intro="Explore how multiplexers choose one data path from many candidates and how that selection logic becomes a versatile design primitive."
+      highlights={[
+        {
+          title: "Digital Switching",
+          text: "Understand how select lines choose a single active route through the circuit.",
+        },
+        {
+          title: "Function Realization",
+          text: "Implement arbitrary Boolean behavior by wiring truth-table values into MUX inputs.",
+        },
+        {
+          title: "Scalable Design",
+          text: "Study cascading patterns that grow small multiplexers into larger routing networks.",
+        },
+      ]}
+    >
+      <div style={{ maxWidth: "900px", margin: "0 auto", fontFamily: "inherit" }}>
 
       {/* Type selector */}
       <MuxTypeSelector selectedType={selectedType} types={MUX_TYPES} onChange={(k) => { setSelectedType(k); setDataVals(Array(8).fill(0)); setSelVals(Array(3).fill(0)); }} />
@@ -91,6 +100,7 @@ const MuxPage = () => {
 
       <TipsPanel tips={MUX_TIPS} />
     </div>
+    </CombinationalLayout>
   );
 };
 

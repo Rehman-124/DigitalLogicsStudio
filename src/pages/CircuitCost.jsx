@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ToolLayout from '../components/ToolLayout';
+import AdvancedLogicLayout from './AdvancedLogic/AdvancedLogicLayout';
 import ExplanationBlock from '../components/ExplanationBlock';
 import InteractiveCalculator from '../components/InteractiveCalculator';
 import CircuitModal from '../components/CircuitModal';
@@ -121,9 +121,24 @@ const CircuitCost = () => {
   const gateInputExample = "F = (A·B) + (C·D')";
 
   return (
-    <ToolLayout
+    <AdvancedLogicLayout
       title="Circuit Cost Analysis"
       subtitle="Understand literal cost and gate input cost for Boolean expressions"
+      intro="Evaluate Boolean expressions with the same polished lesson shell used across the platform, focusing on implementation cost and design efficiency."
+      highlights={[
+        {
+          title: "Literal Accounting",
+          text: "Measure how many variable occurrences a design requires before hardware mapping.",
+        },
+        {
+          title: "Gate Input Cost",
+          text: "Compare the total fan-in burden across candidate circuit implementations.",
+        },
+        {
+          title: "Optimization Context",
+          text: "Understand why cost metrics guide simplification but do not tell the whole story.",
+        },
+      ]}
     >
 
       <ExplanationBlock
@@ -390,7 +405,7 @@ const CircuitCost = () => {
           line-height: 1.6;
         }
       `}</style>
-    </ToolLayout>
+    </AdvancedLogicLayout>
   );
 };
 
