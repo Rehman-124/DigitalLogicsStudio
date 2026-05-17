@@ -1,19 +1,31 @@
 import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
 
 const NAV_LINKS = [
+  { to: "/problems", label: "Problems" },
   { to: "/boolforge", label: "Circuit Forge" },
   { to: "/kmapgenerator", label: "K-Map Studio" },
-  { to: "/boolean-algebra", label: "Boolean Algebra" },
-  { to: "/numbersystemcalculator", label: "Number Systems" },
-  { to: "/sequential/intro", label: "Sequential" },
-  { to: "/timing-diagrams", label: "Resources" },
+  // { to: "/boolean-algebra", label: "Boolean Algebra" },
+  // { to: "/numbersystemcalculator", label: "Number Systems" },
+  // { to: "/sequential/intro", label: "Sequential" },
+  // { to: "/timing-diagrams", label: "Resources" },
 ];
 
 function SunIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <circle cx="12" cy="12" r="5" />
       <line x1="12" y1="1" x2="12" y2="3" />
       <line x1="12" y1="21" x2="12" y2="23" />
@@ -29,7 +41,17 @@ function SunIcon() {
 
 function MoonIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
     </svg>
   );
@@ -38,9 +60,23 @@ function MoonIcon() {
 export function Navbar({ onHomeClick }) {
   const { theme, toggle: toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user, loading, logout } = useAuth();
+  const navigate = useNavigate();
+
   const handleHomeClick = () => {
     setMenuOpen(false);
     onHomeClick?.();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/", { replace: true });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      setMenuOpen(false);
+    }
   };
 
   return (
@@ -59,8 +95,18 @@ export function Navbar({ onHomeClick }) {
                   <stop offset="0%" style={{ stopColor: "var(--app-accent)" }} />
                   <stop offset="100%" style={{ stopColor: "var(--app-secondary)" }} />
                 </linearGradient>
-                <filter id="soft-glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+                <filter
+                  id="soft-glow"
+                  x="-50%"
+                  y="-50%"
+                  width="200%"
+                  height="200%"
+                >
+                  <feGaussianBlur
+                    in="SourceGraphic"
+                    stdDeviation="4"
+                    result="blur"
+                  />
                   <feMerge>
                     <feMergeNode in="blur" />
                     <feMergeNode in="SourceGraphic" />
@@ -76,9 +122,30 @@ export function Navbar({ onHomeClick }) {
                 strokeLinejoin="round"
                 className="logo-trace"
               />
-              <circle cx="30" cy="20" r="7" fill="var(--logo-node-color)" className="logo-node" style={{ filter: "url(#soft-glow)" }} />
-              <circle cx="30" cy="50" r="7" fill="var(--logo-node-color)" className="logo-node" style={{ filter: "url(#soft-glow)" }} />
-              <circle cx="30" cy="80" r="7" fill="var(--logo-node-color)" className="logo-node" style={{ filter: "url(#soft-glow)" }} />
+              <circle
+                cx="30"
+                cy="20"
+                r="7"
+                fill="var(--logo-node-color)"
+                className="logo-node"
+                style={{ filter: "url(#soft-glow)" }}
+              />
+              <circle
+                cx="30"
+                cy="50"
+                r="7"
+                fill="var(--logo-node-color)"
+                className="logo-node"
+                style={{ filter: "url(#soft-glow)" }}
+              />
+              <circle
+                cx="30"
+                cy="80"
+                r="7"
+                fill="var(--logo-node-color)"
+                className="logo-node"
+                style={{ filter: "url(#soft-glow)" }}
+              />
             </svg>
           </div>
           <div className="home-brand-text">
@@ -93,7 +160,9 @@ export function Navbar({ onHomeClick }) {
               key={to}
               to={to}
               className={({ isActive }) =>
-                isActive ? "home-nav-link home-nav-link--active" : "home-nav-link"
+                isActive
+                  ? "home-nav-link home-nav-link--active"
+                  : "home-nav-link"
               }
               onClick={() => setMenuOpen(false)}
             >
@@ -103,10 +172,51 @@ export function Navbar({ onHomeClick }) {
         </nav>
 
         <div className="home-nav-controls">
+          {!loading && (
+            <div className="home-auth-actions">
+              {user ? (
+                <>
+                  <Link
+                    to="/profile"
+                    className="home-user-badge"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {user.name}
+                  </Link>
+                  <button
+                    type="button"
+                    className="home-auth-btn home-auth-btn--ghost"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="home-auth-btn home-auth-btn--ghost"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="home-auth-btn home-auth-btn--primary"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
+            </div>
+          )}
           <button
             onClick={toggleTheme}
             className="home-theme-btn"
-            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            aria-label={
+              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+            }
           >
             {theme === "dark" ? <SunIcon /> : <MoonIcon />}
           </button>
@@ -136,13 +246,54 @@ export function Navbar({ onHomeClick }) {
               key={to}
               to={to}
               className={({ isActive }) =>
-                isActive ? "home-mobile-link home-nav-link--active" : "home-mobile-link"
+                isActive
+                  ? "home-mobile-link home-nav-link--active"
+                  : "home-mobile-link"
               }
               onClick={() => setMenuOpen(false)}
             >
               {label}
             </NavLink>
           ))}
+          {!loading && (
+            <div className="home-mobile-auth">
+              {user ? (
+                <>
+                  <Link
+                    to="/profile"
+                    className="home-user-badge"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {user.name}
+                  </Link>
+                  <button
+                    type="button"
+                    className="home-auth-btn home-auth-btn--ghost"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="home-auth-btn home-auth-btn--ghost"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="home-auth-btn home-auth-btn--primary"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Sign Up
+                  </Link>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </nav>
     </header>

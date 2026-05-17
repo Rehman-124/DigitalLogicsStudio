@@ -5,7 +5,29 @@ import { SaveAndLoad } from "../components/SaveAndLoad";
 import { parseExpressionToCircuit } from "../utils/expressionParser";
 import "./../assets/css/Boolforge.css";
 
-const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
+// ─── Constants ────────────────────────────────────────────────────────────────
+const MAX_GATE_INPUTS = 8; // Maximum inputs any logic gate can have
+const MIN_GATE_INPUTS = 2; // Minimum inputs for multi-input gates
+
+// Gates that support variable numbers of inputs (2–MAX_GATE_INPUTS)
+const MULTI_INPUT_GATES = new Set(["AND", "OR", "NAND", "NOR", "XOR", "XNOR"]);
+
+// Gates that are always single-input
+const SINGLE_INPUT_GATES = new Set(["NOT", "BUFFER", "OUTPUT"]);
+
+// ─── Helper: compute input count for a gate type ──────────────────────────────
+function defaultInputCount(type) {
+  if (type === "INPUT") return 0;
+  if (SINGLE_INPUT_GATES.has(type)) return 1;
+  return 2; // default for multi-input gates
+}
+
+const Boolforge = ({
+  simplifiedExpression = null,
+  variables = [],
+  onCircuitChange,
+  portNames = null, // { inputs: string[], outputs: string[] } — from problem
+}) => {
   const [gates, setGates] = useState([]);
   const [wires, setWires] = useState([]);
   const [selectedGate, setSelectedGate] = useState(null);
@@ -25,6 +47,12 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
 
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
+
+  // ── Stable gate state for feedback/latch circuits ─────────────────────────
+  // Stores the last converged output value per gate id.
+  // This breaks cyclic dependency during recursive evaluation so that
+  // feedback circuits (SR latch, D latch, etc.) simulate correctly.
+  const gateStateRef = useRef(new Map());
 
   const GRID_SIZE = 20;
   const SNAP_TO_GRID = true;
@@ -81,78 +109,118 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
     return map;
   }, [gates]);
 
-  const evaluateGate = useCallback(
-    (gate, memo = new Map(), depth = 0) => {
-      // Prevent infinite recursion
-      if (depth > 100) {
-        console.warn("Max recursion depth reached in evaluateGate");
+  // ── Gate logic: compute a single gate's output from resolved inputs ──────────
+  const computeGateOutput = (gate, inputs) => {
+    const ci = inputs.filter((v) => v !== undefined);
+    switch (gate.type) {
+      case "INPUT":
+        return gate.inputValues[0] || false;
+      case "AND":
+        return ci.length > 0 && ci.every(Boolean);
+      case "OR":
+        return ci.some(Boolean);
+      case "NOT":
+        return inputs[0] !== undefined ? !inputs[0] : false;
+      case "NAND":
+        return !(ci.length > 0 && ci.every(Boolean));
+      case "NOR":
+        return !ci.some(Boolean);
+      case "XOR":
+        return ci.length >= 2 && ci.reduce((acc, v) => acc !== v, false);
+      case "XNOR":
+        return ci.length >= 2 && !ci.reduce((acc, v) => acc !== v, false);
+      case "BUFFER":
+      case "OUTPUT":
+        return inputs[0] ?? false;
+      default:
         return false;
+    }
+  };
+
+  // ── Iterative double-buffered simulation (synchronous, runs during render) ──
+  //
+  // WHY useMemo, not useEffect:
+  //   evaluateGate is called during render (JSX). useEffect fires *after*
+  //   the render, so a ref updated there is always one frame stale.
+  //   useMemo runs synchronously before the JSX is produced, so the values
+  //   are ready when the render reads them.
+  //
+  // WHY double-buffering (prev → next):
+  //   Each pass reads exclusively from the *previous* pass's values and writes
+  //   to a *new* map. This is the correct way to simulate feedback loops:
+  //   gate A's new value depends on gate B's *old* value, not on B's
+  //   already-updated new value. Without this, a NOR-NOR SR latch collapses
+  //   to (false, false) because both gates see each other's updated outputs
+  //   within the same pass.
+  //
+  // HOW latches work with this approach:
+  //   The previous stable state lives in gateStateRef. When inputs change,
+  //   the first pass reads the old Q/Q̄ values from gateStateRef as the
+  //   initial "prev" map. The loop then converges to the new stable state
+  //   over a few passes (typically 2–4 for an SR latch).
+  const gateValues = React.useMemo(() => {
+    // Build incoming-wire lookup: toId → [{ fromId, toIndex }]
+    const incomingWires = new Map();
+    gates.forEach((g) => incomingWires.set(g.id, []));
+    wires.forEach((w) => {
+      if (incomingWires.has(w.toId)) incomingWires.get(w.toId).push(w);
+    });
+
+    // Seed the initial "previous" map from:
+    //   - INPUT gates: their live toggle value
+    //   - all other gates: the last converged value stored in gateStateRef
+    //     (this is what carries latch memory across renders)
+    let prev = new Map();
+    gates.forEach((g) => {
+      if (g.type === "INPUT") {
+        prev.set(g.id, g.inputValues[0] || false);
+      } else {
+        prev.set(g.id, gateStateRef.current.get(g.id) ?? false);
       }
+    });
 
-      if (!gate) return false;
+    // Double-buffered iteration: read from prev, write to next
+    const MAX_ITER = 100;
+    for (let iter = 0; iter < MAX_ITER; iter++) {
+      const next = new Map(prev);
+      let changed = false;
 
-      if (memo.has(gate.id)) {
-        return memo.get(gate.id);
-      }
-
-      if (gate.type === "INPUT") {
-        const result = gate.inputValues[0] || false;
-        memo.set(gate.id, result);
-        return result;
-      }
-
-      const inputs = [];
-
-      wires.forEach((wire) => {
-        if (wire.toId === gate.id) {
-          const fromGate = gateMap.get(wire.fromId);
-          if (fromGate) {
-            const sourceOutput = evaluateGate(fromGate, memo, depth + 1);
-            inputs[wire.toIndex] = sourceOutput;
+      for (const gate of gates) {
+        let newVal;
+        if (gate.type === "INPUT") {
+          newVal = gate.inputValues[0] || false;
+        } else {
+          const inputs = [];
+          for (const w of incomingWires.get(gate.id) || []) {
+            inputs[w.toIndex] = prev.get(w.fromId) ?? false; // read from PREV
           }
+          newVal = computeGateOutput(gate, inputs);
         }
-      });
 
-      let result = false;
-      const connectedInputs = inputs.filter((v) => v !== undefined);
-      switch (gate.type) {
-        case "AND":
-          result = connectedInputs.length > 0 && connectedInputs.every(Boolean);
-          break;
-        case "OR":
-          result = connectedInputs.some(Boolean);
-          break;
-        case "NOT":
-          result = !inputs[0];
-          break;
-        case "NAND":
-          result = !(
-            connectedInputs.length > 0 && connectedInputs.every(Boolean)
-          );
-          break;
-        case "NOR":
-          result = !connectedInputs.some(Boolean);
-          break;
-        case "XOR":
-          result = inputs.length === 2 && inputs[0] !== inputs[1];
-          break;
-        case "XNOR":
-          result = inputs.length === 2 && inputs[0] === inputs[1];
-          break;
-        case "BUFFER":
-          result = inputs[0] || false;
-          break;
-        case "OUTPUT":
-          result = inputs[0] || false;
-          break;
-        default:
-          result = false;
+        next.set(gate.id, newVal); // write to NEXT
+
+        if (prev.get(gate.id) !== newVal) changed = true;
       }
 
-      memo.set(gate.id, result);
-      return result;
+      prev = next;
+      if (!changed) break;
+    }
+
+    // Persist the converged state so the next render seeds from it
+    // (this is what gives latches their memory)
+    gateStateRef.current = prev;
+
+    return prev;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gates, wires]);
+
+  // ── Gate evaluation — reads from the synchronously computed state map ──────
+  const evaluateGate = useCallback(
+    (gate) => {
+      if (!gate) return false;
+      return gateValues.get(gate.id) ?? false;
     },
-    [wires, gateMap],
+    [gateValues],
   );
 
   const drawWires = useCallback(() => {
@@ -169,8 +237,6 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
       ctx.save();
       ctx.translate(panOffset.x, panOffset.y);
       ctx.scale(zoom, zoom);
-
-      const memo = new Map();
 
       wires.forEach((wire) => {
         try {
@@ -199,8 +265,7 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
             toY = gateTop + (wire.toIndex / (n - 1)) * (gateBottom - gateTop);
           }
 
-          const isActive = evaluateGate(fromGate, memo);
-
+          const isActive = evaluateGate(fromGate);
           ctx.strokeStyle = isActive ? "#00ff88" : "#334155";
           ctx.lineWidth = 3 / zoom;
           ctx.shadowBlur = isActive ? 12 / zoom : 0;
@@ -483,13 +548,15 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
     saveToHistory();
   };
 
-  const handleCanvasClick = (e) => {
+  // ── Right-click canvas to delete wires ───────────────────────────────────
+  // Samples points along the actual Bézier curve for accurate hit-testing.
+  const handleCanvasContextMenu = (e) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = (e.clientX - rect.left - panOffset.x) / zoom;
+    const y = (e.clientY - rect.top - panOffset.y) / zoom;
 
     for (const wire of wires) {
       const fromGate = gateMap.get(wire.fromId);
@@ -500,20 +567,50 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
       const fromX = fromGate.x + 120;
       const fromY = fromGate.y + 50;
       const toX = toGate.x;
-      const toY =
-        toGate.y + (toGate.inputs === 1 ? 50 : wire.toIndex === 0 ? 35 : 65);
+      const toY = getInputY(toGate, wire.toIndex);
 
-      const distance =
-        Math.abs(
-          (toY - fromY) * x - (toX - fromX) * y + toX * fromY - toY * fromX,
-        ) / Math.sqrt((toY - fromY) ** 2 + (toX - fromX) ** 2);
+      // Compute the same control points used in drawWires
+      const dx = toX - fromX;
+      const dy = toY - fromY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const controlDistance = Math.min(Math.abs(dx) / 2, distance / 3);
+      const cp1x = fromX + controlDistance;
+      const cp1y = fromY;
+      const cp2x = toX - controlDistance;
+      const cp2y = toY;
 
-      if (distance < 10) {
+      // Sample the Bézier curve and check if click is within threshold
+      const SAMPLES = 60;
+      const HIT_RADIUS = 8;
+      let hit = false;
+      for (let i = 0; i <= SAMPLES; i++) {
+        const t = i / SAMPLES;
+        const mt = 1 - t;
+        const bx =
+          mt * mt * mt * fromX +
+          3 * mt * mt * t * cp1x +
+          3 * mt * t * t * cp2x +
+          t * t * t * toX;
+        const by =
+          mt * mt * mt * fromY +
+          3 * mt * mt * t * cp1y +
+          3 * mt * t * t * cp2y +
+          t * t * t * toY;
+        if (Math.sqrt((bx - x) ** 2 + (by - y) ** 2) < HIT_RADIUS) {
+          hit = true;
+          break;
+        }
+      }
+
+      if (hit) {
+        e.preventDefault();
         setWires((prev) => prev.filter((w) => w.id !== wire.id));
         saveToHistory();
         return;
       }
     }
+    // If no wire was hit, let the default context menu appear (or suppress it)
+    e.preventDefault();
   };
 
   const toggleInput = (gate) => {
@@ -525,68 +622,39 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
   };
 
   const evaluateGateWithGates = useCallback(
-    (gate, gatesArray, depth = 0, visited = new Set()) => {
-      if (depth > 100) {
-        console.warn("Max recursion depth in evaluateGateWithGates");
-        return false;
-      }
-
-      if (!gate) return false;
-
-      // Detect circular dependencies
-      if (visited.has(gate.id)) {
-        console.warn("Circular dependency detected in circuit");
-        return false;
-      }
-
-      if (gate.type === "INPUT") {
-        return gate.inputValues[0] || false;
-      }
-
-      const inputs = [];
-      const newVisited = new Set(visited);
-      newVisited.add(gate.id);
-
-      wires.forEach((wire) => {
-        if (wire.toId === gate.id) {
-          const fromGate = gatesArray.find((g) => g.id === wire.fromId);
-          if (fromGate) {
-            const sourceOutput = evaluateGateWithGates(
-              fromGate,
-              gatesArray,
-              depth + 1,
-              newVisited,
-            );
-            inputs[wire.toIndex] = sourceOutput;
-          }
-        }
+    (gate, gatesArray) => {
+      // Build wire lookup
+      const incomingWires = new Map();
+      gatesArray.forEach((g) => incomingWires.set(g.id, []));
+      wires.forEach((w) => {
+        if (incomingWires.has(w.toId)) incomingWires.get(w.toId).push(w);
       });
 
-      const connectedInputs2 = inputs.filter((v) => v !== undefined);
-      switch (gate.type) {
-        case "AND":
-          return connectedInputs2.length > 0 && connectedInputs2.every(Boolean);
-        case "OR":
-          return connectedInputs2.some(Boolean);
-        case "NOT":
-          return !inputs[0];
-        case "NAND":
-          return !(
-            connectedInputs2.length > 0 && connectedInputs2.every(Boolean)
-          );
-        case "NOR":
-          return !connectedInputs2.some(Boolean);
-        case "XOR":
-          return inputs.length === 2 && inputs[0] !== inputs[1];
-        case "XNOR":
-          return inputs.length === 2 && inputs[0] === inputs[1];
-        case "BUFFER":
-          return inputs[0] || false;
-        case "OUTPUT":
-          return inputs[0] || false;
-        default:
-          return false;
+      // Double-buffered: seed prev from INPUT values, non-inputs default false
+      let prev = new Map();
+      gatesArray.forEach((g) => {
+        prev.set(g.id, g.type === "INPUT" ? g.inputValues[0] || false : false);
+      });
+
+      // Iterate to convergence using double-buffering (read prev, write next)
+      for (let iter = 0; iter < 100; iter++) {
+        const next = new Map(prev);
+        let changed = false;
+        for (const g of gatesArray) {
+          if (g.type === "INPUT") continue;
+          const inputs = [];
+          for (const w of incomingWires.get(g.id) || []) {
+            inputs[w.toIndex] = prev.get(w.fromId) ?? false; // read from PREV
+          }
+          const newVal = computeGateOutput(g, inputs);
+          next.set(g.id, newVal); // write to NEXT
+          if (prev.get(g.id) !== newVal) changed = true;
+        }
+        prev = next;
+        if (!changed) break;
       }
+
+      return prev.get(gate.id) ?? false;
     },
     [wires],
   );
@@ -642,69 +710,13 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
     setHistoryIndex(-1);
   };
 
-  // Generate input label: A-M, then AA-AM, BA-BM, ..., MA-MM, then AAA-AAM, etc.
-  const generateInputLabel = (index) => {
-    const alphabet = "ABCDEFGHIJKLM"; // A to M (13 letters)
-    const base = alphabet.length;
-
-    if (index < base) {
-      // Single letter: A-M
-      return alphabet[index];
-    }
-
-    // For multi-letter labels
-    let label = "";
-    let remaining = index - base; // Offset for double letters starting after M
-    let length = 2; // Start with double letters
-
-    // Find the appropriate length (2, 3, 4, etc.)
-    let maxForLength = Math.pow(base, length);
-    while (remaining >= maxForLength) {
-      remaining -= maxForLength;
-      length++;
-      maxForLength = Math.pow(base, length);
-    }
-
-    // Generate the label for the current length
-    for (let i = 0; i < length; i++) {
-      label = alphabet[remaining % base] + label;
-      remaining = Math.floor(remaining / base);
-    }
-
-    return label;
-  };
-
-  // Generate output label: Z-N, then ZZ-ZN, YZ-YN, ..., NZ-NN, then ZZZ-ZZN, etc.
-  const generateOutputLabel = (index) => {
-    const alphabet = "ZYXWVUTSRQPON"; // Z to N reversed (13 letters)
-    const base = alphabet.length;
-
-    if (index < base) {
-      // Single letter: Z-N
-      return alphabet[index];
-    }
-
-    // For multi-letter labels
-    let label = "";
-    let remaining = index - base; // Offset for double letters starting after N
-    let length = 2; // Start with double letters
-
-    // Find the appropriate length (2, 3, 4, etc.)
-    let maxForLength = Math.pow(base, length);
-    while (remaining >= maxForLength) {
-      remaining -= maxForLength;
-      length++;
-      maxForLength = Math.pow(base, length);
-    }
-
-    // Generate the label for the current length
-    for (let i = 0; i < length; i++) {
-      label = alphabet[remaining % base] + label;
-      remaining = Math.floor(remaining / base);
-    }
-
-    return label;
-  };
+  // ── Label generators ───────────────────────────────────────────────────────
+  // If a problem is loaded, use its exact port names in order.
+  // Otherwise fall back to I0, I1, … / S0, S1, …
+  const generateInputLabel = (index) =>
+    portNames?.inputs?.[index] ?? `I${index}`;
+  const generateOutputLabel = (index) =>
+    portNames?.outputs?.[index] ?? `S${index}`;
 
   const inputGates = React.useMemo(
     () => gates.filter((g) => g.type === "INPUT"),
@@ -821,22 +833,41 @@ const Boolforge = ({ simplifiedExpression = null, variables = [] }) => {
           </button>
         </div>
 
-        <div className="app-card" style={{ marginTop: 'auto', padding: '1rem' }}>
-          <h3 style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--app-accent)', marginBottom: '0.5rem' }}>Quick Controls</h3>
-          <div style={{ fontSize: '0.75rem', color: 'var(--app-muted)', lineHeight: '1.6' }}>
-            <p>🖱️ <b>Drag</b> gates to move</p>
-            <p>🔗 <b>Connect</b> output to input</p>
-            <p>⚡ <b>Click</b> inputs to toggle</p>
-            <p>🖱️ <b>Pan</b> by dragging background</p>
-            <p>🔍 <b>Scroll</b> to zoom</p>
-          </div>
+        <div className="instructions">
+          <p>
+            <strong>Controls:</strong>
+          </p>
+          <p>• Click gate buttons to add gates</p>
+          <p>• Drag gates to move them</p>
+          <p>• Drag canvas background to pan</p>
+          <p>• Click output → input to connect</p>
+          <p>• Right-click wire to delete it</p>
+          <p>• Right-click gate to delete</p>
+          <p>• Double-click gate to rename it</p>
+          <p>• Scroll to zoom in/out</p>
+          {/* ← NEW instructions for multi-input */}
+          <p>
+            • Click <strong>+</strong> on a gate to add an input (max{" "}
+            {MAX_GATE_INPUTS})
+          </p>
+          <p>
+            • Click <strong>−</strong> on a gate to remove an input (min{" "}
+            {MIN_GATE_INPUTS})
+          </p>
+          <p>
+            <strong>Keyboard Shortcuts:</strong>
+          </p>
+          <p>• Ctrl+Z: Undo</p>
+          <p>• Ctrl+Shift+Z: Redo</p>
+          <p>• Delete: Remove selected gate</p>
+          <p>• Escape: Cancel connection</p>
         </div>
       </div>
 
       <div className="canvas-container" ref={containerRef}>
         <canvas
           ref={canvasRef}
-          onClick={handleCanvasClick}
+          onContextMenu={handleCanvasContextMenu}
           onMouseDown={handleCanvasMouseDown}
           style={{
             pointerEvents: "auto",
