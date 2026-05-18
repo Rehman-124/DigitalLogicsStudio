@@ -229,6 +229,10 @@
   display: flex;
   align-items: center;
   gap: 0;
+  overflow: hidden;
+  width: 100%;
+  padding: 10px 0 25px 0;
+  margin: -10px 0 -25px 0;
 }
 
 .banner-slider-arrow {
@@ -290,6 +294,37 @@
   border-radius: 1.4rem;
   padding: 1rem 1.05rem;
   color: #fff;
+}
+
+.banner-card-animated {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  width: 240px;
+  flex-shrink: 0;
+}
+
+.banner-card-animated:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+  z-index: 10;
+}
+
+.banner-marquee {
+  display: flex !important;
+  width: max-content;
+  animation: scrollMarquee 25s linear infinite;
+  overflow: visible !important;
+  scroll-snap-type: none !important;
+}
+
+.problems-banner-slider:hover .banner-marquee {
+  animation-play-state: paused;
+}
+
+@keyframes scrollMarquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-50% - 0.45rem)); }
 }
 
 .problems-banner-card span {

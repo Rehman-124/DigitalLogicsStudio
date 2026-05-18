@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useMemo } from "react";
 import Boolforge from "../pages/Boolforge";
 import { useAuth } from "../context/AuthContext";
 import { validateCircuit } from "../utils/circuitProblemValidator";
@@ -158,7 +158,6 @@ const S = {
     fontSize: "0.85rem",
     lineHeight: 1.5,
   },
-  // Assignment panel
   assignPanel: {
     padding: "1rem",
     borderBottom: "1px solid var(--border-color,#2a3550)",
@@ -251,58 +250,47 @@ function AssignmentPanel({
         style={{
           background: "var(--bg-medium,#141b2d)",
           border: "1px solid var(--border-color,#2a3550)",
-          borderRadius: 14,
-          padding: "1.5rem",
+          borderRadius: 12,
+          padding: "1.25rem",
           minWidth: 320,
           maxWidth: 480,
-          boxShadow: "0 24px 64px rgba(0,0,0,0.7)",
-          display: "flex",
-          flexDirection: "column",
-          gap: "1rem",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <span style={{ fontSize: "1.2rem" }}>🔀</span>
-          <h3
-            style={{
-              margin: 0,
-              color: "var(--text-color,#e8f0ff)",
-              fontSize: "1rem",
-            }}
-          >
-            Map Gates to Problem Ports
-          </h3>
-        </div>
+        <h3
+          style={{
+            margin: "0 0 1rem",
+            color: "var(--text-color,#e8f0ff)",
+            fontSize: "1rem",
+            fontWeight: 800,
+          }}
+        >
+          🔀 Assign Gates to Ports
+        </h3>
         <p
           style={{
-            margin: 0,
-            fontSize: "0.8rem",
+            fontSize: "0.78rem",
             color: "var(--secondary-text,#8899aa)",
+            margin: "0 0 0.75rem",
             lineHeight: 1.5,
           }}
         >
-          Select which circuit gate corresponds to each problem input/output. By
-          default the validator uses{" "}
-          <strong style={{ color: "var(--accent-secondary,#00d4ff)" }}>
-            position order
-          </strong>{" "}
-          — use this only if you need custom mapping.
+          Map each problem port to the circuit gate that represents it. Leave on
+          auto to use positional order.
         </p>
 
-        <div>
-          <div
+        <div style={S.assignPanel}>
+          <strong
             style={{
               fontSize: "0.72rem",
-              fontWeight: 700,
+              color: "var(--accent-secondary,#00d4ff)",
               textTransform: "uppercase",
               letterSpacing: "0.08em",
-              color: "var(--accent-primary,#00ff88)",
-              marginBottom: "0.4rem",
             }}
           >
             Inputs
-          </div>
+          </strong>
           {problem.inputs.map((name) => (
             <div key={name} style={S.assignRow}>
               <span style={S.assignLabel}>{name}</span>
@@ -311,10 +299,10 @@ function AssignmentPanel({
                 value={assignment.inputMap[name] ?? ""}
                 onChange={(e) => update("inputMap", name, e.target.value)}
               >
-                <option value="">— select gate —</option>
+                <option value="">Auto</option>
                 {inputGates.map((g) => (
                   <option key={g.id} value={g.id}>
-                    {g.label} (id:{g.id})
+                    {g.label} (gate #{g.id})
                   </option>
                 ))}
               </select>
@@ -322,31 +310,36 @@ function AssignmentPanel({
           ))}
         </div>
 
-        <div>
-          <div
+        <div style={{ ...S.assignPanel, borderBottom: "none" }}>
+          <strong
             style={{
               fontSize: "0.72rem",
-              fontWeight: 700,
+              color: "var(--accent-primary,#00ff88)",
               textTransform: "uppercase",
               letterSpacing: "0.08em",
-              color: "var(--accent-secondary,#00d4ff)",
-              marginBottom: "0.4rem",
             }}
           >
             Outputs
-          </div>
+          </strong>
           {problem.outputs.map((name) => (
             <div key={name} style={S.assignRow}>
-              <span style={S.assignLabel}>{name}</span>
+              <span
+                style={{
+                  ...S.assignLabel,
+                  color: "var(--accent-primary,#00ff88)",
+                }}
+              >
+                {name}
+              </span>
               <select
                 style={S.assignSelect}
                 value={assignment.outputMap[name] ?? ""}
                 onChange={(e) => update("outputMap", name, e.target.value)}
               >
-                <option value="">— select gate —</option>
+                <option value="">Auto</option>
                 {outputGates.map((g) => (
                   <option key={g.id} value={g.id}>
-                    {g.label} (id:{g.id})
+                    {g.label} (gate #{g.id})
                   </option>
                 ))}
               </select>
@@ -354,31 +347,43 @@ function AssignmentPanel({
           ))}
         </div>
 
-const CircuitModal = ({ open, onClose, expression, variables }) => {
-    if (!open) return null;
-    return (
         <div
-            className="circuit-modal-overlay"
-            onClick={(e) => {
-                if (e.target.className === 'circuit-modal-overlay') {
-                    onClose();
-                }
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: "0.5rem",
+            marginTop: "0.75rem",
+          }}
+        >
+          <button
+            style={{
+              background: "none",
+              border: "1px solid var(--border-color,#2a3550)",
+              color: "var(--secondary-text,#8899aa)",
+              borderRadius: 6,
+              padding: "0.35rem 0.8rem",
+              cursor: "pointer",
+              fontSize: "0.82rem",
+            }}
+            onClick={() => {
+              setAssignment({ inputMap: {}, outputMap: {} });
+              onClose();
             }}
           >
-            Reset to Positional
+            Reset to Auto
           </button>
           <button
-            onClick={onClose}
             style={{
               background: "linear-gradient(135deg,#3b82f6,#8b5cf6)",
               border: "none",
               color: "#fff",
               borderRadius: 6,
-              padding: "0.35rem 0.9rem",
+              padding: "0.35rem 0.8rem",
               cursor: "pointer",
-              fontSize: "0.85rem",
+              fontSize: "0.82rem",
               fontWeight: 700,
             }}
+            onClick={onClose}
           >
             Done
           </button>
@@ -389,39 +394,74 @@ const CircuitModal = ({ open, onClose, expression, variables }) => {
 }
 
 // ─── Main CircuitModal ────────────────────────────────────────────────────────
-const CircuitModal = ({ open, onClose, problem }) => {
+const CircuitModal = ({
+  open,
+  onClose,
+  problem: problemProp,
+  expression,
+  variables,
+}) => {
+  // Experiment mode: BA pages pass expression + variables instead of a problem object.
+  // useMemo keeps these stable so they're safe in useEffect dependency arrays.
+  const isExperimentMode = useMemo(
+    () => !problemProp && Boolean(expression && variables),
+    [problemProp, expression, variables],
+  );
+
+  const problem = useMemo(() => {
+    if (problemProp) return problemProp;
+    if (!isExperimentMode) return null;
+    return {
+      id: null,
+      title: expression,
+      inputs: variables,
+      outputs: ["F"],
+    };
+  }, [problemProp, isExperimentMode, expression, variables]);
+
+  // Boolforge's parseExpressionToCircuit expects just the RHS (e.g. "A + B").
+  // Strip any leading "F = " / "X = " prefix that BA pages include.
+  const boolforgeExpression = useMemo(() => {
+    if (!isExperimentMode || !expression) return null;
+    return expression.replace(/^[A-Za-z]\s*=\s*/, "").trim();
+  }, [isExperimentMode, expression]);
+
   const [gates, setGates] = useState([]);
   const [wires, setWires] = useState([]);
-  const [result, setResult] = useState(null); // { pass, rows, error }
+  const [result, setResult] = useState(null);
   const [showAssign, setShowAssign] = useState(false);
   const [completionError, setCompletionError] = useState("");
   const [isSavingCompletion, setIsSavingCompletion] = useState(false);
-  // Ref-based guard so persistSolvedState doesn't need isSavingCompletion as a dep
   const isSavingRef = React.useRef(false);
-  // assignment: null → use positional, else { inputMap, outputMap }
   const [assignment, setAssignment] = useState({ inputMap: {}, outputMap: {} });
+
   const {
     isAuthenticated = false,
     user = null,
     markProblemSolved = async () => {},
     hasSolvedProblem = () => false,
   } = useAuth() || {};
-  const problemId = problem?.id;
+
+  const problemId = problem?.id ?? null;
   const isAssigned =
     Object.keys(assignment.inputMap).length > 0 ||
     Object.keys(assignment.outputMap).length > 0;
 
+  // Never call hasSolvedProblem(null): Number(null) === 0 which is a valid
+  // integer and would accidentally match problem id 0 in the solved set.
+  const isSolvedForUser =
+    !isExperimentMode && problemId !== null
+      ? hasSolvedProblem(problemId)
+      : false;
+
   const handleCircuitChange = useCallback((g, w) => {
     setGates(g);
     setWires(w);
-    setResult(null); // clear result when circuit changes
+    setResult(null);
   }, []);
 
   const handleSubmit = () => {
-    if (!problem) {
-      return;
-    }
-
+    if (!problem) return;
     const useAssignment = isAssigned ? assignment : null;
     const res = validateCircuit(gates, wires, problem, useAssignment);
     setResult(res);
@@ -433,7 +473,6 @@ const CircuitModal = ({ open, onClose, problem }) => {
   const needOutputs = problem?.outputs.length ?? 0;
   const hasRight =
     inputGates.length === needInputs && outputGates.length === needOutputs;
-  const isSolvedForUser = problem ? hasSolvedProblem(problem.id) : false;
 
   const persistSolvedState = useCallback(async () => {
     if (
@@ -444,11 +483,9 @@ const CircuitModal = ({ open, onClose, problem }) => {
     ) {
       return;
     }
-
     isSavingRef.current = true;
     setIsSavingCompletion(true);
     setCompletionError("");
-
     try {
       await markProblemSolved(problemId);
     } catch (error) {
@@ -460,27 +497,21 @@ const CircuitModal = ({ open, onClose, problem }) => {
       isSavingRef.current = false;
       setIsSavingCompletion(false);
     }
-  }, [isAuthenticated, isSolvedForUser, markProblemSolved, problemId]); // isSavingCompletion removed — using ref instead to avoid infinite loop
+  }, [isAuthenticated, isSolvedForUser, markProblemSolved, problemId]);
 
+  // Auto-validate only for graded problems — experiment mode has no truth table.
   useEffect(() => {
-    if (!open || !problem || !hasRight || isSolvedForUser) {
+    if (!open || !problem || isExperimentMode || !hasRight || isSolvedForUser) {
       return;
     }
-
     const validationResult = validateCircuit(
       gates,
       wires,
       problem,
       isAssigned ? assignment : null,
     );
-
-    if (!validationResult.pass) {
-      return;
-    }
-
-    // Only update result and persist if not already solved
+    if (!validationResult.pass) return;
     setResult((prev) => {
-      // Avoid redundant state update if already showing a passing result
       if (prev?.pass) return prev;
       return validationResult;
     });
@@ -490,6 +521,7 @@ const CircuitModal = ({ open, onClose, problem }) => {
     gates,
     hasRight,
     isAssigned,
+    isExperimentMode,
     isSolvedForUser,
     open,
     persistSolvedState,
@@ -529,7 +561,6 @@ const CircuitModal = ({ open, onClose, problem }) => {
     <div style={S.overlay}>
       {/* ── Top bar ── */}
       <div style={S.topBar}>
-        {/* Problem title */}
         <span
           style={{
             fontWeight: 800,
@@ -538,10 +569,12 @@ const CircuitModal = ({ open, onClose, problem }) => {
             whiteSpace: "nowrap",
           }}
         >
-          #{problem.id} {problem.title}
+          {isExperimentMode
+            ? `🔌 Experiment: ${problem.title}`
+            : `#${problem.id} ${problem.title}`}
         </span>
 
-        {/* I/O requirement pills */}
+        {/* I/O pills */}
         <div style={S.ioBar}>
           <span style={S.needLabel}>Need:</span>
           <span style={S.pill("#00ff88")}>
@@ -552,8 +585,6 @@ const CircuitModal = ({ open, onClose, problem }) => {
             {needOutputs} OUTPUT{needOutputs !== 1 ? "S" : ""} (
             {problem.outputs.join(", ")})
           </span>
-
-          {/* Live count feedback */}
           <span
             style={{
               fontSize: "0.72rem",
@@ -569,83 +600,89 @@ const CircuitModal = ({ open, onClose, problem }) => {
           </span>
         </div>
 
-        {/* Map gates button */}
-        <button
-          style={{
-            background: isAssigned ? "rgba(0,212,255,0.12)" : "none",
-            border: isAssigned
-              ? "1px solid var(--accent-secondary,#00d4ff)"
-              : "1px solid var(--border-color,#2a3550)",
-            color: isAssigned
-              ? "var(--accent-secondary,#00d4ff)"
-              : "var(--secondary-text,#8899aa)",
-            borderRadius: 6,
-            padding: "0.3rem 0.7rem",
-            cursor: "pointer",
-            fontSize: "0.8rem",
-            fontWeight: isAssigned ? 700 : 400,
-            whiteSpace: "nowrap",
-          }}
-          title="Manually assign which circuit gate maps to which problem port. Use this if auto (positional) matching gives wrong results."
-          onClick={() => setShowAssign(true)}
-        >
-          🔀 Map Gates {isAssigned ? "(custom)" : "(auto)"}
-        </button>
-
-        {/* Submit */}
-        <button
-          style={S.submitBtn(!hasRight)}
-          disabled={!hasRight}
-          onClick={handleSubmit}
-          title={
-            !hasRight
-              ? `Add exactly ${needInputs} INPUT and ${needOutputs} OUTPUT gate(s)`
-              : "Validate circuit against truth table"
-          }
-        >
-          ⚡ Submit Circuit
-        </button>
-
-        <div style={S.statusCard(completionTone)}>
-          <span
+        {/* Map gates — graded problems only */}
+        {!isExperimentMode && (
+          <button
             style={{
-              fontSize: "0.68rem",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.08em",
-              color: "var(--secondary-text,#8899aa)",
+              background: isAssigned ? "rgba(0,212,255,0.12)" : "none",
+              border: isAssigned
+                ? "1px solid var(--accent-secondary,#00d4ff)"
+                : "1px solid var(--border-color,#2a3550)",
+              color: isAssigned
+                ? "var(--accent-secondary,#00d4ff)"
+                : "var(--secondary-text,#8899aa)",
+              borderRadius: 6,
+              padding: "0.3rem 0.7rem",
+              cursor: "pointer",
+              fontSize: "0.8rem",
+              fontWeight: isAssigned ? 700 : 400,
+              whiteSpace: "nowrap",
             }}
+            title="Manually assign which circuit gate maps to which problem port."
+            onClick={() => setShowAssign(true)}
           >
-            Progress
-          </span>
-          <span
-            style={{
-              fontSize: "0.86rem",
-              fontWeight: 800,
-              color:
-                completionTone === "complete"
-                  ? "var(--accent-primary,#00ff88)"
-                  : completionTone === "warning"
-                    ? "#fbbf24"
-                    : completionTone === "error"
-                      ? "var(--accent-danger,#ff3366)"
-                      : "var(--text-color,#e8f0ff)",
-            }}
-          >
-            {completionLabel}
-          </span>
-          <span
-            style={{
-              fontSize: "0.72rem",
-              color: "var(--secondary-text,#8899aa)",
-              lineHeight: 1.4,
-            }}
-          >
-            {completionSubtext}
-          </span>
-        </div>
+            🔀 Map Gates {isAssigned ? "(custom)" : "(auto)"}
+          </button>
+        )}
 
-        {/* Close */}
+        {/* Submit — graded problems only */}
+        {!isExperimentMode && (
+          <button
+            style={S.submitBtn(!hasRight)}
+            disabled={!hasRight}
+            onClick={handleSubmit}
+            title={
+              !hasRight
+                ? `Add exactly ${needInputs} INPUT and ${needOutputs} OUTPUT gate(s)`
+                : "Validate circuit against truth table"
+            }
+          >
+            ⚡ Submit Circuit
+          </button>
+        )}
+
+        {/* Progress card — graded problems only */}
+        {!isExperimentMode && (
+          <div style={S.statusCard(completionTone)}>
+            <span
+              style={{
+                fontSize: "0.68rem",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                color: "var(--secondary-text,#8899aa)",
+              }}
+            >
+              Progress
+            </span>
+            <span
+              style={{
+                fontSize: "0.86rem",
+                fontWeight: 800,
+                color:
+                  completionTone === "complete"
+                    ? "var(--accent-primary,#00ff88)"
+                    : completionTone === "warning"
+                      ? "#fbbf24"
+                      : completionTone === "error"
+                        ? "var(--accent-danger,#ff3366)"
+                        : "var(--text-color,#e8f0ff)",
+              }}
+            >
+              {completionLabel}
+            </span>
+            <span
+              style={{
+                fontSize: "0.72rem",
+                color: "var(--secondary-text,#8899aa)",
+                lineHeight: 1.4,
+              }}
+            >
+              {completionSubtext}
+            </span>
+          </div>
+        )}
+
         <button style={S.closeBtn} onClick={onClose}>
           ✕ Close
         </button>
@@ -653,16 +690,21 @@ const CircuitModal = ({ open, onClose, problem }) => {
 
       {/* ── Body ── */}
       <div style={S.body}>
-        {/* Boolforge canvas */}
         <div style={S.canvas}>
           <Boolforge
             onCircuitChange={handleCircuitChange}
             portNames={{ inputs: problem.inputs, outputs: problem.outputs }}
+            // Pass the expression so Boolforge auto-builds the circuit via its
+            // existing parseExpressionToCircuit + hasAutoBuilt hook.
+            // Only set these in experiment mode; leave null for graded problems
+            // so Boolforge starts with a blank canvas as before.
+            simplifiedExpression={isExperimentMode ? boolforgeExpression : null}
+            variables={isExperimentMode ? variables : []}
           />
         </div>
 
-        {/* Result panel */}
-        {result && (
+        {/* Result panel — graded problems only */}
+        {!isExperimentMode && result && (
           <div style={S.resultPanel}>
             <div style={S.resultHeader(result.pass)}>
               <span style={{ fontSize: "1.4rem" }}>
@@ -689,11 +731,9 @@ const CircuitModal = ({ open, onClose, problem }) => {
             {!result.error &&
               result.rows.length > 0 &&
               (() => {
-                // Build columns: all input keys + for each output: expected + got
                 const inputKeys = problem.inputs;
                 const outputKeys = problem.outputs;
                 const failCount = result.rows.filter((r) => !r.pass).length;
-
                 return (
                   <div style={S.tableWrap}>
                     {!result.pass && (
@@ -781,7 +821,6 @@ const CircuitModal = ({ open, onClose, problem }) => {
                 );
               })()}
 
-            {/* Positional mapping note */}
             {!result.error && (
               <div
                 style={{
@@ -807,80 +846,37 @@ const CircuitModal = ({ open, onClose, problem }) => {
                       .join(", ")}.`}{" "}
                 Wrong mapping?{" "}
                 <button
-                    className="circuit-modal-close"
-                    onClick={onClose}
-                    title="Close Circuit Editor"
+                  onClick={() => setShowAssign(true)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "var(--accent-secondary,#00d4ff)",
+                    textDecoration: "underline",
+                    fontSize: "0.72rem",
+                    padding: 0,
+                  }}
                 >
-                    ✕
+                  Map gates manually →
                 </button>
-                <Boolforge simplifiedExpression={expression} variables={variables} />
-            </div>
-            <style jsx>{`
-        .circuit-modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: rgba(0, 0, 0, 0.85);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 9999;
-          padding: 20px;
-          backdrop-filter: blur(4px);
-        }
-        .circuit-modal-container {
-          position: relative;
-          width: 95vw;
-          height: 90vh;
-          background: var(--bg-primary, #0f172a);
-          border-radius: 16px;
-          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-          overflow: hidden;
-          border: 2px solid rgba(99, 102, 241, 0.3);
-        }
-        .circuit-modal-close {
-          position: absolute;
-          top: 16px;
-          right: 16px;
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          background: rgba(239, 68, 68, 0.9);
-          color: white;
-          border: 2px solid rgba(255, 255, 255, 0.2);
-          font-size: 24px;
-          font-weight: bold;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 10000;
-          transition: all 0.2s ease;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-        .circuit-modal-close:hover {
-          background: rgba(220, 38, 38, 1);
-          transform: rotate(90deg) scale(1.1);
-          box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
-        }
-        .circuit-modal-close:active {
-          transform: rotate(90deg) scale(0.95);
-        }
-        @media (max-width: 768px) {
-          .circuit-modal-container {
-            width: 100vw;
-            height: 100vh;
-            border-radius: 0;
-          }
-          .circuit-modal-overlay {
-            padding: 0;
-          }
-        }
-      `}</style>
-        </div>
-    );
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Assignment modal — graded problems only */}
+      {!isExperimentMode && showAssign && (
+        <AssignmentPanel
+          problem={problem}
+          gates={gates}
+          assignment={assignment}
+          setAssignment={setAssignment}
+          onClose={() => setShowAssign(false)}
+        />
+      )}
+    </div>
+  );
 };
 
 export default CircuitModal;

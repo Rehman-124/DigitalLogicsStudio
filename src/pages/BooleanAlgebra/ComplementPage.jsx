@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import ToolLayout from "../../components/ToolLayout";
-import ExplanationBlock from "../../components/ExplanationBlock";
+import BALayout from "./components/BALayout";
 import ControlPanel from "../../components/ControlPanel";
 import ControlGroup from "../../components/ControlGroup";
 import CircuitModal from "../../components/CircuitModal";
@@ -31,17 +30,17 @@ const ComplementPage = () => {
   const posComplement = toPOSComplement(expr);
 
   return (
-    <ToolLayout
+    <BALayout
       title="Complement, Duality & De Morgan"
       subtitle="Explanation-first walkthrough and circuit experiment"
+      intro="Complement operations and De Morgan's laws enable powerful transformations between different logical forms — essential for circuit optimization and implementing logic with universal gates."
     >
-      <ExplanationBlock title="Understanding Complement and De Morgan's Laws">
-        <p className="explanation-intro">
-          Complement operations and De Morgan's laws are fundamental concepts in
-          Boolean algebra that enable powerful transformations between different
-          logical forms. These principles are essential for circuit optimization
-          and implementing logic with universal gates.
-        </p>
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">
+            Understanding Complement and De Morgan's Laws
+          </h2>
+        </div>
         <div className="info-card">
           <h4>De Morgan's Laws:</h4>
           <p>
@@ -80,57 +79,46 @@ const ComplementPage = () => {
           <h4>Practical Application:</h4>
           <p>
             Most modern integrated circuits are built using only NAND or NOR
-            gates because they're "universal" - De Morgan's laws show us how to
+            gates because they're "universal" — De Morgan's laws show us how to
             implement any Boolean function using these universal gates.
           </p>
         </div>
-      </ExplanationBlock>
-      <ControlPanel>
-        <ControlGroup label="Expression (SOP)">
-          <input
-            type="text"
-            className="control-input"
-            value={expr}
-            onChange={(e) => {
-              const v = e.target.value;
-              setExpr(v);
-            }}
-            placeholder="F = AB + C"
-          />
-        </ControlGroup>
-      </ControlPanel>
+      </section>
 
-      <ExplanationBlock title="De Morgan’s Law">
-        <p className="explanation-intro">For sums and products:</p>
-        <ul>
-          <li>(X + Y)' = X' • Y'</li>
-          <li>(XY)' = X' + Y'</li>
-        </ul>
-        <p>
-          Complement of a sum of products becomes a product of sums with each
-          literal complemented.
-        </p>
-      </ExplanationBlock>
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Try It: SOP → POS Complement</h2>
+        </div>
+        <ControlPanel>
+          <ControlGroup label="Expression (SOP)">
+            <input
+              type="text"
+              className="control-input"
+              value={expr}
+              onChange={(e) => setExpr(e.target.value)}
+              placeholder="F = AB + C"
+            />
+          </ControlGroup>
+        </ControlPanel>
 
-      <ExplanationBlock title="Step-by-Step Complement Process">
-        <div className="example-box">
+        <div className="example-box" style={{ marginTop: "1rem" }}>
           <h4>Converting SOP to POS Complement:</h4>
           <p>
             <strong>Example:</strong> F = AB + C
           </p>
           <p>
             <strong>Step 1:</strong> Apply De Morgan's law to entire expression:
+            F' = (AB + C)' = (AB)' • C'
           </p>
-          <p>F' = (AB + C)' = (AB)' • C'</p>
           <p>
-            <strong>Step 2:</strong> Apply De Morgan's law to first term:
+            <strong>Step 2:</strong> Apply De Morgan's law to first term: F' =
+            (A' + B') • C'
           </p>
-          <p>F' = (A' + B') • C'</p>
           <p>
-            <strong>Step 3:</strong> Final POS form:
+            <strong>Step 3:</strong> Final POS form: F' = (A' + B') • C'
           </p>
-          <p>F' = (A' + B') • C'</p>
         </div>
+
         <div className="interactive-example">
           <h4>Try These Examples:</h4>
           <div className="example-buttons">
@@ -154,43 +142,47 @@ const ComplementPage = () => {
             </button>
           </div>
         </div>
-      </ExplanationBlock>
+      </section>
 
-      <ExplanationBlock title="Complement Conversion (SOP → POS)">
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Complement Conversion Result</h2>
+        </div>
         <p className="explanation-intro">
           Starting expression:{" "}
           <span className="highlight">
             {expr.replace(/^F\s*=\s*/, "").trim() || "—"}
           </span>
         </p>
-        <p>
+        <p className="explanation-intro">
           Complement (POS form):{" "}
           <span className="highlight">{posComplement}</span>
         </p>
         <div className="info-card">
           <h4>What This Means:</h4>
           <p>
-            The complement expression represents the same logic function but in
+            The complement expression represents the same logic function in
             Product of Sums form, where each sum term corresponds to a maxterm
             (where original function outputs 0).
           </p>
         </div>
-      </ExplanationBlock>
+      </section>
 
-      <ExplanationBlock title="Universal Gate Implementation">
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Universal Gate Implementation</h2>
+        </div>
         <div className="comparison-grid">
-          <div className="comparison-card">
+          <div className="info-card">
             <h5>NAND Implementation</h5>
-            <p>Using only NAND gates:</p>
             <ul>
               <li>NOT: NAND with shorted inputs</li>
               <li>AND: NAND followed by NOT</li>
               <li>OR: NAND with complemented inputs</li>
             </ul>
           </div>
-          <div className="comparison-card">
+          <div className="info-card">
             <h5>NOR Implementation</h5>
-            <p>Using only NOR gates:</p>
             <ul>
               <li>NOT: NOR with shorted inputs</li>
               <li>OR: NOR followed by NOT</li>
@@ -206,22 +198,24 @@ const ComplementPage = () => {
             NOR as their basic building blocks.
           </p>
         </div>
-      </ExplanationBlock>
-
-      <div className="kmap-card" style={{ display: "grid", gap: 12 }}>
-        <button
-          className="kmap-btn kmap-btn-primary"
-          onClick={() => setOpenOrig(true)}
+        <div
+          className="kmap-card"
+          style={{ display: "grid", gap: 12, marginTop: "1rem" }}
         >
-          🔌 Experiment: Original Circuit
-        </button>
-        <button
-          className="kmap-btn kmap-btn-secondary"
-          onClick={() => setOpenComp(true)}
-        >
-          🔌 Experiment: Complement Circuit
-        </button>
-      </div>
+          <button
+            className="kmap-btn kmap-btn-primary"
+            onClick={() => setOpenOrig(true)}
+          >
+            🔌 Experiment: Original Circuit
+          </button>
+          <button
+            className="kmap-btn kmap-btn-secondary"
+            onClick={() => setOpenComp(true)}
+          >
+            🔌 Experiment: Complement Circuit
+          </button>
+        </div>
+      </section>
 
       <CircuitModal
         open={openOrig}
@@ -235,7 +229,7 @@ const ComplementPage = () => {
         expression={`F = ${posComplement}`}
         variables={variables.length ? variables : ["A", "B", "C"]}
       />
-    </ToolLayout>
+    </BALayout>
   );
 };
 

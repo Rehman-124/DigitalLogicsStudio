@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from "react";
-import ToolLayout from "../../components/ToolLayout";
-import ExplanationBlock from "../../components/ExplanationBlock";
+import BALayout from "./components/BALayout";
 import ControlPanel from "../../components/ControlPanel";
 import ControlGroup from "../../components/ControlGroup";
 import CircuitModal from "../../components/CircuitModal";
@@ -26,14 +25,15 @@ const MintermsPage = () => {
   const mins = useMemo(() => listMinterms(variables, expr), [variables, expr]);
 
   return (
-    <ToolLayout title="Minterms" subtitle="Where the function outputs 1">
-      <ExplanationBlock title="Understanding Minterms">
-        <p className="explanation-intro">
-          Minterms are fundamental building blocks in Boolean algebra that
-          represent specific input combinations where a Boolean function outputs
-          1. Each minterm corresponds to exactly one row in the truth table
-          where the function is true.
-        </p>
+    <BALayout
+      title="Minterms"
+      subtitle="Where the function outputs 1"
+      intro="Minterms are fundamental building blocks in Boolean algebra that represent specific input combinations where a Boolean function outputs 1. Each minterm corresponds to exactly one row in the truth table where the function is true."
+    >
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Understanding Minterms</h2>
+        </div>
         <div className="info-card">
           <h4>Minterm Properties:</h4>
           <ul>
@@ -80,45 +80,37 @@ const MintermsPage = () => {
             Karnaugh maps.
           </p>
         </div>
-      </ExplanationBlock>
-      <ControlPanel>
-        <ControlGroup label="Expression (SOP)">
-          <input
-            type="text"
-            className="control-input"
-            value={expr}
-            onChange={(e) => setExpr(e.target.value)}
-          />
-        </ControlGroup>
-      </ControlPanel>
+      </section>
 
-      <ExplanationBlock title="Minterm Analysis">
-        <p className="explanation-intro">
-          Current minterm indexes:{" "}
-          <span className="highlight">{mins.join(", ") || "—"}</span>
-        </p>
-        <div className="info-card">
-          <h4>What These Indexes Mean:</h4>
-          <p>
-            Each number represents a truth table row where the function outputs
-            1:
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Interactive Minterm Finder</h2>
+        </div>
+        <ControlPanel>
+          <ControlGroup label="Expression (SOP)">
+            <input
+              type="text"
+              className="control-input"
+              value={expr}
+              onChange={(e) => setExpr(e.target.value)}
+            />
+          </ControlGroup>
+        </ControlPanel>
+
+        <div style={{ marginTop: "1rem" }}>
+          <p className="explanation-intro">
+            Current minterm indexes:{" "}
+            <span className="highlight">{mins.join(", ") || "—"}</span>
           </p>
-          <ul>
-            <li>Index 0 = Input combination 000 (A'=0, B'=0, C'=0)</li>
-            <li>Index 3 = Input combination 011 (A'=0, B=1, C=1)</li>
-            <li>Index 7 = Input combination 111 (A=1, B=1, C=1)</li>
-          </ul>
+          <div className="info-card">
+            <h4>From Minterms to Expression:</h4>
+            <p>If minterms are [1, 3, 7], the canonical SOP is:</p>
+            <p>F = m₁ + m₃ + m₇ = A'B'C + A'BC + ABC</p>
+            <p>This can often be simplified using Boolean algebra!</p>
+          </div>
         </div>
-        <div className="example-box">
-          <h4>From Minterms to Expression:</h4>
-          <p>If minterms are [1, 3, 7], the canonical SOP is:</p>
-          <p>F = m₁ + m₃ + m₇ = A'B'C + A'BC + ABC</p>
-          <p>This can often be simplified using Boolean algebra!</p>
-        </div>
-      </ExplanationBlock>
 
-      <ExplanationBlock title="Interactive Examples">
-        <div className="interactive-example">
+        <div className="interactive-example" style={{ marginTop: "1rem" }}>
           <h4>Try These Expressions:</h4>
           <div className="example-buttons">
             <button
@@ -147,15 +139,12 @@ const MintermsPage = () => {
             </button>
           </div>
         </div>
-        <div className="example-box">
+
+        <div className="example-box" style={{ marginTop: "1rem" }}>
           <h4>Practice Problem:</h4>
           <p>What are the minterms for F = A + BC?</p>
           <details>
             <summary>Show Solution</summary>
-            <p>
-              <strong>Truth Table Analysis:</strong>
-            </p>
-            <p>F = 1 when: A=1 (any B,C) OR (A=0 AND B=1 AND C=1)</p>
             <p>
               <strong>Minterms:</strong> [1, 2, 3, 4, 5, 6, 7]
             </p>
@@ -164,37 +153,45 @@ const MintermsPage = () => {
             </p>
           </details>
         </div>
-      </ExplanationBlock>
+      </section>
 
-      <div className="binary-table-container">
-        <table className="binary-table">
-          <thead className="binary-table-header">
-            <tr>
-              {tt.headers.map((h) => (
-                <th key={h}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {tt.rows.map((row, i) => (
-              <tr key={i} className="binary-table-row">
-                {row.map((c, j) => (
-                  <td
-                    key={j}
-                    className={`binary-table-cell ${j === tt.headers.length - 1 && c === 1 ? "binary-table-cell-primary" : ""}`}
-                  >
-                    {c}
-                  </td>
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Truth Table</h2>
+        </div>
+        <div className="binary-table-container">
+          <table className="binary-table">
+            <thead className="binary-table-header">
+              <tr>
+                {tt.headers.map((h) => (
+                  <th key={h}>{h}</th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {tt.rows.map((row, i) => (
+                <tr key={i} className="binary-table-row">
+                  {row.map((c, j) => (
+                    <td
+                      key={j}
+                      className={`binary-table-cell ${j === tt.headers.length - 1 && c === 1 ? "binary-table-cell-primary" : ""}`}
+                    >
+                      {c}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-      <ExplanationBlock title="Minterm Applications">
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Minterm Applications</h2>
+        </div>
         <div className="comparison-grid">
-          <div className="comparison-card">
+          <div className="info-card">
             <h5>Design Applications</h5>
             <ul>
               <li>PLA/PAL programming</li>
@@ -203,7 +200,7 @@ const MintermsPage = () => {
               <li>Truth table to circuit conversion</li>
             </ul>
           </div>
-          <div className="comparison-card">
+          <div className="info-card">
             <h5>Optimization Uses</h5>
             <ul>
               <li>Karnaugh map grouping</li>
@@ -221,16 +218,15 @@ const MintermsPage = () => {
             better.
           </p>
         </div>
-      </ExplanationBlock>
-
-      <div className="kmap-card">
-        <button
-          className="kmap-btn kmap-btn-primary kmap-btn-full"
-          onClick={() => setOpen(true)}
-        >
-          🔌 Visualize Circuit
-        </button>
-      </div>
+        <div className="kmap-card" style={{ marginTop: "1rem" }}>
+          <button
+            className="kmap-btn kmap-btn-primary kmap-btn-full"
+            onClick={() => setOpen(true)}
+          >
+            🔌 Visualize Circuit
+          </button>
+        </div>
+      </section>
 
       <CircuitModal
         open={open}
@@ -238,7 +234,7 @@ const MintermsPage = () => {
         expression={expr}
         variables={variables}
       />
-    </ToolLayout>
+    </BALayout>
   );
 };
 

@@ -6,6 +6,8 @@ import { GroupingGuide } from '../components/GroupingGuide';
 import { TruthTableDisplay } from '../components/TruthTableDisplay';
 import { useKMapLogic } from '../hooks/useKMapLogic';
 import Boolforge from './Boolforge';
+import RelatedSeoLinks from '../components/seo/RelatedSeoLinks';
+import { trackToolInteraction } from '../utils/analytics';
 
 const KMapGenerator = () => {
     const [numVariables, setNumVariables] = useState(3);
@@ -34,6 +36,9 @@ const KMapGenerator = () => {
     };
 
     const handleExample = () => {
+        trackToolInteraction('kmap_generator', 'load_example', {
+            variable_count: numVariables,
+        });
         if (numVariables === 3) {
             setMinterms('0,1,2,5,6,7');
             setDontCares('3,4');
@@ -48,6 +53,9 @@ const KMapGenerator = () => {
     };
 
     const handleReset = () => {
+        trackToolInteraction('kmap_generator', 'reset', {
+            variable_count: numVariables,
+        });
         setMinterms('');
         setDontCares('');
         setShowSolution(false);
@@ -55,10 +63,13 @@ const KMapGenerator = () => {
     };
 
     return (
-        <div className="kmap-page-content">
-            <div className="app-section">
-                <span className="app-section-kicker">Configuration</span>
-                <h2 className="app-section-title">Input Parameters</h2>
+        <div className="kmap-container">
+            <div className="kmap-header-gradient">
+                <h1 className="kmap-main-title">Karnaugh Map Generator</h1>
+                <p className="kmap-subtitle">Simplify Boolean expressions with interactive K-Maps</p>
+            </div>
+
+            <div className="kmap-content-wrapper">
                 <InputControls
                     numVariables={numVariables}
                     variables={variables}
@@ -70,17 +81,19 @@ const KMapGenerator = () => {
                     onMintermsChange={setMinterms}
                     onDontCaresChange={setDontCares}
                     onOptimizationTypeChange={setOptimizationType}
-                    onGenerate={() => setShowSolution(true)}
+                    onGenerate={() => {
+                        trackToolInteraction('kmap_generator', 'generate_solution', {
+                            variable_count: numVariables,
+                            optimization_type: optimizationType,
+                        });
+                        setShowSolution(true);
+                    }}
                     onExample={handleExample}
                     onReset={handleReset}
                 />
-            </div>
 
-            {showSolution && (
-                <div className="app-content-wrap">
-                    <div className="app-section">
-                        <span className="app-section-kicker">Visualization</span>
-                        <h2 className="app-section-title">Interactive K-Map Grid</h2>
+                {showSolution && (
+                    <>
                         <KMapDisplay
                             grid={grid}
                             groups={groups}
@@ -91,28 +104,30 @@ const KMapGenerator = () => {
                             showGroupingGuide={showGroupingGuide}
                             optimizationType={optimizationType}
                         />
-                    </div>
 
-                    <div className="app-card">
                         <SimplifiedExpression
                             expression={expression}
                             showGroupingGuide={showGroupingGuide}
                             onToggleGuide={() => setShowGroupingGuide(!showGroupingGuide)}
                         />
-                        
-                        <button
-                            className="app-btn app-btn-primary"
-                            onClick={() => setShowCircuitModal(true)}
-                            style={{ width: '100%', marginTop: '1.5rem' }}
-                        >
-                            🔌 Experiment with Circuit Forge
-                        </button>
-                    </div>
 
-                    {showGroupingGuide && (
-                        <div className="app-section">
-                            <span className="app-section-kicker">Step-by-Step</span>
-                            <h2 className="app-section-title">Grouping Logic</h2>
+                        {/* Circuit Experiment Button */}
+                        <div className="kmap-card">
+                            <button
+                                className="kmap-btn kmap-btn-primary kmap-btn-full"
+                                onClick={() => setShowCircuitModal(true)}
+                                style={{
+                                    marginTop: 'var(--spacing-md)',
+                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                    fontSize: '1.05rem',
+                                    padding: 'var(--spacing-md) var(--spacing-lg)'
+                                }}
+                            >
+                                🔌 Experiment with Circuit
+                            </button>
+                        </div>
+
+                        {showGroupingGuide && (
                             <GroupingGuide
                                 groups={groups}
                                 variables={variables}
@@ -122,12 +137,8 @@ const KMapGenerator = () => {
                                 getRowLabels={getRowLabels}
                                 optimizationType={optimizationType}
                             />
-                        </div>
-                    )}
+                        )}
 
-                    <div className="app-section">
-                        <span className="app-section-kicker">Reference</span>
-                        <h2 className="app-section-title">Truth Table Matrix</h2>
                         <TruthTableDisplay
                             numVariables={numVariables}
                             variables={variables}
@@ -135,24 +146,25 @@ const KMapGenerator = () => {
                             dontCares={dontCares}
                             optimizationType={optimizationType}
                         />
-                    </div>
-                </div>
-            )}
+                    </>
+                )}
+            </div>
 
             {/* Circuit Modal */}
             {showCircuitModal && (
                 <div
-                    className="app-modal-overlay"
+                    className="circuit-modal-overlay"
                     onClick={(e) => {
-                        if (e.target.className === 'app-modal-overlay') {
+                        if (e.target.className === 'circuit-modal-overlay') {
                             setShowCircuitModal(false);
                         }
                     }}
                 >
-                    <div className="app-modal-content">
+                    <div className="circuit-modal-container">
                         <button
-                            className="app-modal-close"
+                            className="circuit-modal-close"
                             onClick={() => setShowCircuitModal(false)}
+                            title="Close Circuit Editor"
                         >
                             ✕
                         </button>
@@ -163,6 +175,78 @@ const KMapGenerator = () => {
                     </div>
                 </div>
             )}
+
+            <style jsx>{`
+                .circuit-modal-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background-color: rgba(0, 0, 0, 0.85);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                    padding: 20px;
+                    backdrop-filter: blur(4px);
+                }
+
+                .circuit-modal-container {
+                    position: relative;
+                    width: 95vw;
+                    height: 90vh;
+                    background: var(--bg-primary, #0f172a);
+                    border-radius: 16px;
+                    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                    overflow: hidden;
+                    border: 2px solid rgba(99, 102, 241, 0.3);
+                }
+
+                .circuit-modal-close {
+                    position: absolute;
+                    top: 16px;
+                    right: 16px;
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 50%;
+                    background: rgba(239, 68, 68, 0.9);
+                    color: white;
+                    border: 2px solid rgba(255, 255, 255, 0.2);
+                    font-size: 24px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                    transition: all 0.2s ease;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                }
+
+                .circuit-modal-close:hover {
+                    background: rgba(220, 38, 38, 1);
+                    transform: rotate(90deg) scale(1.1);
+                    box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+                }
+
+                .circuit-modal-close:active {
+                    transform: rotate(90deg) scale(0.95);
+                }
+
+                @media (max-width: 768px) {
+                    .circuit-modal-container {
+                        width: 100vw;
+                        height: 100vh;
+                        border-radius: 0;
+                    }
+
+                    .circuit-modal-overlay {
+                        padding: 0;
+                    }
+                }
+            `}</style>
+            <RelatedSeoLinks />
         </div>
     );
 };

@@ -2,12 +2,20 @@ const fs = require('fs');
 const path = require('path');
 
 const files = [
-    { file: 'src/components/CircuitModal.jsx', strategy: 'theirs' },
-    { file: 'src/pages/Boolforge.jsx', strategy: 'theirs' },
-    { file: 'src/App.js', strategy: 'theirs' }
+    'src/App.js',
+    'src/components/CircuitModal.jsx',
+    'src/index.js',
+    'src/pages/Boolforge.jsx',
+    'src/pages/BooleanAlgebra/BooleanAlgebraOverview.jsx',
+    'src/pages/EncoderAndDecoder/decoder/DecoderPage.jsx',
+    'src/pages/Home/Footer.jsx',
+    'src/pages/KmapGenerator.jsx',
+    'src/pages/RegistersAndTransfers/RegLayout.jsx',
+    'src/pages/SequentialCircuits/SeqLayout.jsx',
+    'src/pages/Home/HomeData.js'
 ];
 
-files.forEach(({ file, strategy }) => {
+files.forEach((file) => {
     const fullPath = path.join('c:/Users/Delll/OneDrive/Desktop/DigitalLogicsStudio', file);
     if (!fs.existsSync(fullPath)) return;
     
@@ -28,14 +36,16 @@ files.forEach(({ file, strategy }) => {
         } else {
             if (state === 'normal') {
                 newLines.push(line);
-            } else if (state === 'ours' && strategy === 'ours') {
+            } else if (state === 'ours' && false) {
+                // Ignore ours
                 newLines.push(line);
-            } else if (state === 'theirs' && strategy === 'theirs') {
+            } else if (state === 'theirs' && true) {
+                // Keep theirs
                 newLines.push(line);
             }
         }
     }
     
     fs.writeFileSync(fullPath, newLines.join('\n'));
-    console.log(`Resolved ${file} using ${strategy}`);
+    console.log(`Resolved ${file} using theirs`);
 });

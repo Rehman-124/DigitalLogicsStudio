@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import ToolLayout from "../../components/ToolLayout";
-import ExplanationBlock from "../../components/ExplanationBlock";
+import BALayout from "./components/BALayout";
 import CircuitModal from "../../components/CircuitModal";
 
 const laws = [
@@ -50,18 +49,17 @@ const laws = [
 
 const BooleanLaws = () => {
   const [open, setOpen] = useState(false);
+
   return (
-    <ToolLayout
+    <BALayout
       title="Boolean Algebraic Laws"
       subtitle="Core properties with examples and applications"
+      intro="Boolean algebraic laws are fundamental rules that govern how Boolean expressions can be manipulated. They are the foundation for digital circuit design, optimization, and implementation."
     >
-      <ExplanationBlock title="Understanding Boolean Laws">
-        <p className="explanation-intro">
-          Boolean algebraic laws are fundamental rules that govern how Boolean
-          expressions can be manipulated. These laws are not just mathematical
-          curiosities - they are the foundation for digital circuit design,
-          optimization, and implementation.
-        </p>
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Understanding Boolean Laws</h2>
+        </div>
         <div className="info-card">
           <h4>Why These Laws Matter:</h4>
           <ul>
@@ -85,9 +83,12 @@ const BooleanLaws = () => {
             </li>
           </ul>
         </div>
-      </ExplanationBlock>
+      </section>
 
-      <ExplanationBlock title="Fundamental Laws">
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Fundamental Laws</h2>
+        </div>
         <div className="laws-grid">
           {laws.map((l) => (
             <div key={l.name} className="law-card">
@@ -102,8 +103,14 @@ const BooleanLaws = () => {
             </div>
           ))}
         </div>
-      </ExplanationBlock>
-      <ExplanationBlock title="Practical Example: Circuit Optimization">
+      </section>
+
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">
+            Practical Example: Circuit Optimization
+          </h2>
+        </div>
         <div className="example-box">
           <h4>Problem: Simplify F = AB + AB' + A'B</h4>
           <p>
@@ -124,38 +131,39 @@ const BooleanLaws = () => {
             <strong>Impact:</strong> 67% reduction in gate count and complexity.
           </p>
         </div>
-      </ExplanationBlock>
 
-      <div className="interactive-example">
-        <h4>Try It Yourself:</h4>
-        <p>Can you simplify: F = A + AB + A'B'?</p>
-        <details>
-          <summary>Show Solution</summary>
-          <p>
-            <strong>Solution:</strong> F = A + B'
-          </p>
-          <p>
-            <strong>Steps:</strong> A + AB = A (absorption), so F = A + A'B' = A
-            + B' (by consensus theorem)
-          </p>
-        </details>
-      </div>
+        <div className="interactive-example">
+          <h4>Try It Yourself:</h4>
+          <p>Can you simplify: F = A + AB + A'B'?</p>
+          <details>
+            <summary>Show Solution</summary>
+            <p>
+              <strong>Solution:</strong> F = A + B'
+            </p>
+            <p>
+              <strong>Steps:</strong> A + AB = A (absorption), so F = A + A'B' =
+              A + B' (by consensus theorem)
+            </p>
+          </details>
+        </div>
 
-      <div className="kmap-card">
-        <button
-          className="kmap-btn kmap-btn-primary kmap-btn-full"
-          onClick={() => setOpen(true)}
-        >
-          🔌 Visualize Circuit Example
-        </button>
-      </div>
+        <div className="kmap-card">
+          <button
+            className="kmap-btn kmap-btn-primary kmap-btn-full"
+            onClick={() => setOpen(true)}
+          >
+            🔌 Visualize Circuit Example
+          </button>
+        </div>
+      </section>
+
       <CircuitModal
         open={open}
         onClose={() => setOpen(false)}
         expression={"F = AB + AC"}
         variables={["A", "B", "C"]}
       />
-    </ToolLayout>
+    </BALayout>
   );
 };
 

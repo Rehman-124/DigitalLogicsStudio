@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import ToolLayout from "../../components/ToolLayout";
-import ExplanationBlock from "../../components/ExplanationBlock";
+import BALayout from "./components/BALayout";
 import ControlPanel from "../../components/ControlPanel";
 import ControlGroup from "../../components/ControlGroup";
 import CircuitModal from "../../components/CircuitModal";
@@ -22,17 +21,17 @@ const DualityPrinciple = () => {
   const [open, setOpen] = useState(false);
 
   return (
-    <ToolLayout
+    <BALayout
       title="Duality Principle"
       subtitle="Swap operators and identity values"
+      intro="The Duality Principle states that every Boolean expression has a dual, obtained by interchanging OR and AND operations, and interchanging 0s and 1s. If an identity is true, its dual is also true."
     >
-      <ExplanationBlock title="Understanding the Duality Principle">
-        <p className="explanation-intro">
-          The Duality Principle is a fundamental concept in Boolean algebra that
-          states: every Boolean expression has a dual, obtained by interchanging
-          OR and AND operations, and interchanging 0s and 1s. If an identity is
-          true, its dual is also true.
-        </p>
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">
+            Understanding the Duality Principle
+          </h2>
+        </div>
         <div className="info-card">
           <h4>Duality Rules:</h4>
           <ul>
@@ -65,89 +64,94 @@ const DualityPrinciple = () => {
           <p>
             Duality doubles the power of Boolean algebra. Once you prove an
             identity, you automatically know its dual is also true. This
-            symmetry is beautiful and practical - it reduces the number of
-            theorems you need to learn and prove.
+            symmetry reduces the number of theorems you need to learn and prove.
           </p>
         </div>
-      </ExplanationBlock>
-      <ControlPanel>
-        <ControlGroup label="Expression">
-          <input
-            type="text"
-            className="control-input"
-            value={expr}
-            onChange={(e) => {
-              const v = e.target.value;
-              setExpr(v);
-              setDual(applyDuality(v));
-            }}
-          />
-        </ControlGroup>
-      </ControlPanel>
+      </section>
 
-      <ExplanationBlock title="Dual Expression">
-        <p className="explanation-intro">
-          Original:{" "}
-          <span className="highlight">
-            {expr.replace(/^F\s*=\s*/, "").trim()}
-          </span>
-        </p>
-        <p className="explanation-intro">
-          Dual: <span className="highlight">{dual}</span>
-        </p>
-        <div className="example-box">
-          <h4>Verification:</h4>
-          <p>
-            Both expressions will have the same truth table structure, just with
-            0s and 1s swapped in the final output column.
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Interactive Dual Calculator</h2>
+        </div>
+        <ControlPanel>
+          <ControlGroup label="Expression">
+            <input
+              type="text"
+              className="control-input"
+              value={expr}
+              onChange={(e) => {
+                const v = e.target.value;
+                setExpr(v);
+                setDual(applyDuality(v));
+              }}
+            />
+          </ControlGroup>
+        </ControlPanel>
+
+        <div style={{ marginTop: "1rem" }}>
+          <p className="explanation-intro">
+            Original:{" "}
+            <span className="highlight">
+              {expr.replace(/^F\s*=\s*/, "").trim()}
+            </span>
           </p>
+          <p className="explanation-intro">
+            Dual: <span className="highlight">{dual}</span>
+          </p>
+          <div className="example-box">
+            <h4>Verification:</h4>
+            <p>
+              Both expressions will have the same truth table structure, just
+              with 0s and 1s swapped in the final output column.
+            </p>
+          </div>
         </div>
-      </ExplanationBlock>
 
-      <div className="interactive-example">
-        <h4>Try These Examples:</h4>
-        <div className="example-buttons">
+        <div className="interactive-example" style={{ marginTop: "1rem" }}>
+          <h4>Try These Examples:</h4>
+          <div className="example-buttons">
+            <button
+              className="kmap-btn kmap-btn-secondary"
+              onClick={() => {
+                const e = "F = A + 1";
+                setExpr(e);
+                setDual(applyDuality(e));
+              }}
+            >
+              A + 1
+            </button>
+            <button
+              className="kmap-btn kmap-btn-secondary"
+              onClick={() => {
+                const e = "F = A • B + C";
+                setExpr(e);
+                setDual(applyDuality(e));
+              }}
+            >
+              A • B + C
+            </button>
+            <button
+              className="kmap-btn kmap-btn-secondary"
+              onClick={() => {
+                const e = "F = (A + B) • (A' + C)";
+                setExpr(e);
+                setDual(applyDuality(e));
+              }}
+            >
+              (A + B) • (A' + C)
+            </button>
+          </div>
+        </div>
+
+        <div className="kmap-card" style={{ marginTop: "1rem" }}>
           <button
-            className="kmap-btn kmap-btn-secondary"
-            onClick={() => {
-              const example = "F = A + 1";
-              setExpr(example);
-              setDual(applyDuality(example));
-            }}
+            className="kmap-btn kmap-btn-primary kmap-btn-full"
+            onClick={() => setOpen(true)}
           >
-            A + 1
-          </button>
-          <button
-            className="kmap-btn kmap-btn-secondary"
-            onClick={() => {
-              const example = "F = A • B + C";
-              setExpr(example);
-              setDual(applyDuality(example));
-            }}
-          >
-            A • B + C
-          </button>
-          <button
-            className="kmap-btn kmap-btn-secondary"
-            onClick={() => {
-              const example = "F = (A + B) • (A' + C)";
-              setExpr(example);
-              setDual(applyDuality(example));
-            }}
-          >
-            (A + B) • (A' + C)
+            🔌 Experiment with Circuit
           </button>
         </div>
-      </div>
-
-      <div className="kmap-card">
-        <button
-          className="kmap-btn kmap-btn-primary kmap-btn-full"
-          onClick={() => setOpen(true)}
-        >
-          🔌 Experiment with Circuit
-        </button>
-      </div>
+      </section>
 
       <CircuitModal
         open={open}
@@ -155,7 +159,7 @@ const DualityPrinciple = () => {
         expression={expr}
         variables={["A", "B"]}
       />
-    </ToolLayout>
+    </BALayout>
   );
 };
 

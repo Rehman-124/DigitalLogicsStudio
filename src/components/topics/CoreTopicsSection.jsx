@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import useLearningProgress from "../../hooks/useLearningProgress";
-import coreTopics from "../../data/coreTopics";
 import "./CoreTopicsSection.css";
 
 const iconMap = {
@@ -39,12 +38,7 @@ const accentCopy = {
   slate: "Optimization and mastery",
 };
 
-function TopicCard({
-  topic,
-  progress,
-  onOpenTopic,
-  onToggleSubtopic,
-}) {
+function TopicCard({ topic, progress, onOpenTopic, onToggleSubtopic }) {
   const Icon = iconMap[topic.icon] || Sparkles;
   const completion = progress?.completionPercentage || 0;
   const completedCount = progress?.completedCount || 0;
@@ -66,7 +60,9 @@ function TopicCard({
           <p>{topic.description}</p>
         </div>
         <div className="core-topic-card-status">
-          <span className={`core-topic-check ${isCompleted ? "is-complete" : ""}`}>
+          <span
+            className={`core-topic-check ${isCompleted ? "is-complete" : ""}`}
+          >
             <Check size={16} />
           </span>
           <span>{completion}%</span>
@@ -104,9 +100,11 @@ function TopicCard({
       <div className="core-topic-pill-grid">
         {topic.links.map((link) => {
           const isDone = progress?.completedSubtopics?.includes(link.id);
-
           return (
-            <div key={link.id} className={`core-topic-pill ${isDone ? "is-done" : ""}`}>
+            <div
+              key={link.id}
+              className={`core-topic-pill ${isDone ? "is-done" : ""}`}
+            >
               <Link
                 to={link.to}
                 onClick={() => onOpenTopic(topic)}
@@ -137,20 +135,25 @@ function TopicCard({
           <ArrowRight size={15} />
         </Link>
         <span className="core-topic-completion-note">
-          {isCompleted ? "Completed and synced to your learner dashboard" : "Progress updates as you explore and complete modules"}
+          {isCompleted
+            ? "Completed and synced to your learner dashboard"
+            : "Progress updates as you explore and complete modules"}
         </span>
       </div>
     </article>
   );
 }
 
-export default function CoreTopicsSection({ topics = coreTopics }) {
+// topics must always be passed as a prop from Home.jsx — no internal fallback
+export default function CoreTopicsSection({ topics }) {
   const { user } = useAuth();
   const { snapshot, openTopic, toggleSubtopicCompleted } = useLearningProgress({
     user,
     topics,
     problems: [],
   });
+
+  if (!topics || topics.length === 0) return null;
 
   return (
     <section className="core-topics-section">
@@ -159,9 +162,9 @@ export default function CoreTopicsSection({ topics = coreTopics }) {
           <span className="core-topics-badge">Premium Core Logic Path</span>
           <h2>Core Logic Topics</h2>
           <p>
-            Every core topic now follows one consistent premium architecture inspired by
-            the Arithmetic module, with shared progress indicators, subtopic actions,
-            and a cleaner production-style learning layout.
+            Every core topic now follows one consistent premium architecture
+            inspired by the Arithmetic module, with shared progress indicators,
+            subtopic actions, and a cleaner production-style learning layout.
           </p>
         </div>
 

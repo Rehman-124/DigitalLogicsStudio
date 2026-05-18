@@ -150,7 +150,6 @@
   margin: 0;
 }
 
-
 .search-container {
   display: flex;
   align-items: stretch;
@@ -204,6 +203,7 @@
     box-shadow 0.2s ease,
     opacity 0.2s ease;
   white-space: nowrap;
+  z-index: 660000000000000000000;
 }
 
 .home-search-button:hover {
@@ -325,7 +325,11 @@
   border-radius: 1.75rem;
   border: 1px solid rgba(148, 163, 184, 0.14);
   background:
-    radial-gradient(circle at top right, rgba(59, 130, 246, 0.14), transparent 24%),
+    radial-gradient(
+      circle at top right,
+      rgba(59, 130, 246, 0.14),
+      transparent 24%
+    ),
     linear-gradient(180deg, rgba(8, 15, 31, 0.94), rgba(15, 23, 42, 0.82));
   box-shadow: 0 22px 44px rgba(2, 6, 23, 0.24);
 }
@@ -606,10 +610,16 @@
 }
 
 @keyframes badgePulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.8); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
 }
-
 
 /* ─── Footer ─────────────────────────────────────────────────────── */
 .home-footer-inner {
@@ -718,5 +728,4 @@
   .home-footer-inner {
     grid-template-columns: 1fr;
   }
-
 }

@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from "react";
-import ToolLayout from "../../components/ToolLayout";
-import ExplanationBlock from "../../components/ExplanationBlock";
+import BALayout from "./components/BALayout";
 import ControlPanel from "../../components/ControlPanel";
 import ControlGroup from "../../components/ControlGroup";
 import CircuitModal from "../../components/CircuitModal";
@@ -20,14 +19,17 @@ const ConsensusTheorem = () => {
   const tt = useMemo(() => generateTruthTable(vars, expr), [vars, expr]);
 
   return (
-    <ToolLayout title="Consensus Theorem" subtitle="XY + X'Z + YZ = XY + X'Z">
-      <ExplanationBlock title="Understanding the Consensus Theorem">
-        <p className="explanation-intro">
-          The Consensus Theorem is a powerful Boolean algebra identity that
-          allows elimination of redundant terms. It states that in an expression
-          of the form XY + X'Z + YZ, the consensus term YZ is redundant and can
-          be removed without changing the function's behavior.
-        </p>
+    <BALayout
+      title="Consensus Theorem"
+      subtitle="XY + X'Z + YZ = XY + X'Z"
+      intro="The Consensus Theorem is a powerful Boolean algebra identity that allows elimination of redundant terms. In an expression of the form XY + X'Z + YZ, the consensus term YZ is redundant and can be removed without changing the function's behavior."
+    >
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">
+            Understanding the Consensus Theorem
+          </h2>
+        </div>
         <div className="info-card">
           <h4>The Theorem:</h4>
           <p>
@@ -52,68 +54,64 @@ const ConsensusTheorem = () => {
             and propagation delay while maintaining identical functionality.
           </p>
         </div>
-      </ExplanationBlock>
-      <ControlPanel>
-        <ControlGroup label="Expression (SOP)">
-          <input
-            type="text"
-            className="control-input"
-            value={expr}
-            onChange={(e) => setExpr(e.target.value)}
-          />
-        </ControlGroup>
-      </ControlPanel>
+      </section>
 
-      <ExplanationBlock title="Applicability Check">
-        <p className="explanation-intro">
-          Applies:{" "}
-          <span className="highlight">
-            {appliesConsensus(expr) ? "Yes" : "No"}
-          </span>
-        </p>
-        <div className="info-card">
-          <h4>Pattern Recognition:</h4>
-          <p>The consensus theorem applies when you have:</p>
-          <ul>
-            <li>
-              Two terms where a variable appears in true form in one term and
-              complemented in another
-            </li>
-            <li>
-              A third term that contains all the literals from both terms except
-              the complementary variable
-            </li>
-          </ul>
-          <p>
-            <strong>Example Pattern:</strong> XY + X'Z + YZ
-          </p>
-          <ul>
-            <li>X appears in XY (true) and X'Z (complemented)</li>
-            <li>YZ contains Y from first term and Z from second term</li>
-          </ul>
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Interactive Consensus Checker</h2>
         </div>
-      </ExplanationBlock>
+        <ControlPanel>
+          <ControlGroup label="Expression (SOP)">
+            <input
+              type="text"
+              className="control-input"
+              value={expr}
+              onChange={(e) => setExpr(e.target.value)}
+            />
+          </ControlGroup>
+        </ControlPanel>
 
-      <ExplanationBlock title="Step-by-Step Simplification">
-        <div className="example-box">
+        <div style={{ marginTop: "1rem" }}>
+          <p className="explanation-intro">
+            Applies:{" "}
+            <span className="highlight">
+              {appliesConsensus(expr) ? "Yes" : "No"}
+            </span>
+          </p>
+          <div className="info-card">
+            <h4>Pattern Recognition:</h4>
+            <p>The consensus theorem applies when you have:</p>
+            <ul>
+              <li>
+                Two terms where a variable appears in true form in one term and
+                complemented in another
+              </li>
+              <li>
+                A third term that contains all the literals from both terms
+                except the complementary variable
+              </li>
+            </ul>
+            <p>
+              <strong>Example Pattern:</strong> XY + X'Z + YZ
+            </p>
+          </div>
+        </div>
+
+        <div className="example-box" style={{ marginTop: "1rem" }}>
           <h4>Example: F = AB + A'C + BC</h4>
           <p>
-            <strong>Step 1:</strong> Identify the pattern:
+            <strong>Step 1:</strong> Identify: AB (X=A, Y=B), A'C (X'=A', Z=C),
+            BC (consensus)
           </p>
-          <ul>
-            <li>Term 1: AB (X=A, Y=B)</li>
-            <li>Term 2: A'C (X'=A', Z=C)</li>
-            <li>Term 3: BC (consensus term)</li>
-          </ul>
           <p>
-            <strong>Step 2:</strong> Apply consensus theorem:
+            <strong>Step 2:</strong> Apply: F = AB + A'C (BC term eliminated)
           </p>
-          <p>F = AB + A'C (BC term eliminated)</p>
           <p>
             <strong>Result:</strong> 33% reduction in terms and literals!
           </p>
         </div>
-        <div className="interactive-example">
+
+        <div className="interactive-example" style={{ marginTop: "1rem" }}>
           <h4>Try These Examples:</h4>
           <div className="example-buttons">
             <button
@@ -136,32 +134,40 @@ const ConsensusTheorem = () => {
             </button>
           </div>
         </div>
-      </ExplanationBlock>
+      </section>
 
-      <div className="binary-table-container">
-        <table className="binary-table">
-          <thead className="binary-table-header">
-            <tr>
-              {tt.headers.map((h) => (
-                <th key={h}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {tt.rows.map((row, i) => (
-              <tr key={i} className="binary-table-row">
-                {row.map((c, j) => (
-                  <td key={j} className="binary-table-cell">
-                    {c}
-                  </td>
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Truth Table</h2>
+        </div>
+        <div className="binary-table-container">
+          <table className="binary-table">
+            <thead className="binary-table-header">
+              <tr>
+                {tt.headers.map((h) => (
+                  <th key={h}>{h}</th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {tt.rows.map((row, i) => (
+                <tr key={i} className="binary-table-row">
+                  {row.map((c, j) => (
+                    <td key={j} className="binary-table-cell">
+                      {c}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-      <ExplanationBlock title="Advanced Applications">
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Advanced Applications</h2>
+        </div>
         <div className="info-card">
           <h4>Multiple Consensus Terms:</h4>
           <p>
@@ -185,16 +191,15 @@ const ConsensusTheorem = () => {
             groups, it can be removed without affecting the function.
           </p>
         </div>
-      </ExplanationBlock>
-
-      <div className="kmap-card">
-        <button
-          className="kmap-btn kmap-btn-primary kmap-btn-full"
-          onClick={() => setOpen(true)}
-        >
-          🔌 Show simplified vs unsimplified circuit
-        </button>
-      </div>
+        <div className="kmap-card" style={{ marginTop: "1rem" }}>
+          <button
+            className="kmap-btn kmap-btn-primary kmap-btn-full"
+            onClick={() => setOpen(true)}
+          >
+            🔌 Show simplified vs unsimplified circuit
+          </button>
+        </div>
+      </section>
 
       <CircuitModal
         open={open}
@@ -202,7 +207,7 @@ const ConsensusTheorem = () => {
         expression={expr}
         variables={vars}
       />
-    </ToolLayout>
+    </BALayout>
   );
 };
 

@@ -1,18 +1,16 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
   Compass,
   Flame,
-  FolderHeart,
   GraduationCap,
   LibraryBig,
   Lock,
   Search,
   Sparkles,
-  Trophy,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
@@ -28,14 +26,16 @@ import problemsCatalog, {
 } from "./problemCatalog";
 import ProblemModal from "./ProblemModal";
 import "./ProblemsPage.css";
+import {
+  trackPracticeEngagement,
+  trackTopicEngagement,
+} from "../../utils/analytics";
 
 const leftNavItems = [
   { label: "Library", icon: LibraryBig, active: true },
-  { label: "Quest", icon: Trophy, badge: "New" },
   { label: "Explore", icon: Compass },
   { label: "Study Plan", icon: GraduationCap },
   { label: "My Lists", icon: BookOpen },
-  { label: "Favorites", icon: FolderHeart },
 ];
 
 const difficultyTone = {
@@ -49,6 +49,64 @@ const weekdayLabels = ["S", "M", "T", "W", "T", "F", "S"];
 const topicLookup = Object.fromEntries(
   coreTopics.map((topic) => [topic.id, topic]),
 );
+
+const problemTopicLandingMap = {
+  "boolean-algebra": {
+    group: "Boolean Algebra",
+    title: "Boolean Algebra Problems",
+    description:
+      "Practice identities, laws, consensus, SOP, POS, minterms, and maxterms with exam-oriented Boolean algebra questions.",
+    links: [
+      { to: "/boolean/overview", label: "Boolean algebra tutorial" },
+      { to: "/boolean/minterms-maxterms", label: "Minterms and maxterms" },
+      { to: "/standard-forms", label: "SOP and POS guide" },
+    ],
+  },
+  "k-map": {
+    group: "Boolean Algebra",
+    title: "K-Map Problems",
+    description:
+      "Train on Karnaugh map grouping, SOP/POS simplification, and expression minimization with guided K-map practice.",
+    links: [
+      { to: "/kmapgenerator", label: "K-map simplifier online" },
+      { to: "/boolean/minterms", label: "Minterms tutorial" },
+      { to: "/boolean/maxterms", label: "Maxterms tutorial" },
+    ],
+  },
+  "number-systems": {
+    group: "Number Systems",
+    title: "Number System Problems",
+    description:
+      "Practice number conversion, complements, signed representation, and binary arithmetic across common base systems.",
+    links: [
+      { to: "/number-systems/calculator", label: "Number system calculator" },
+      { to: "/number-systems/number-conversion", label: "Base conversion tutorial" },
+      { to: "/arithmetic/complements", label: "2's complement guide" },
+    ],
+  },
+  "sequential-circuits": {
+    group: "Sequential Circuits",
+    title: "Sequential Circuit Problems",
+    description:
+      "Revise latches, flip-flops, state tables, and sequence design with focused sequential-circuit practice.",
+    links: [
+      { to: "/sequential/intro", label: "Sequential circuits introduction" },
+      { to: "/sequential/state-diagram", label: "State diagrams and tables" },
+      { to: "/timing-diagrams", label: "Timing diagrams" },
+    ],
+  },
+  "flip-flops": {
+    group: "Sequential Circuits",
+    title: "Flip-Flop Problems",
+    description:
+      "Review SR, JK, D, and T flip-flop truth tables, excitation behavior, and exam-style practice questions.",
+    links: [
+      { to: "/sequential/flip-flops", label: "Flip-flops tutorial" },
+      { to: "/sequential/flip-flop-types", label: "Flip-flop types" },
+      { to: "/problems/sequential-circuits", label: "Sequential circuit problems" },
+    ],
+  },
+};
 
 const monthLabel = (date) =>
   new Intl.DateTimeFormat("en-US", {
@@ -222,8 +280,10 @@ function SelectedProblemCard({ problem, status, onAttempt, onToggleSolved }) {
 }
 
 export default function ProblemsPage() {
+  const { topicSlug } = useParams();
   const { user } = useAuth();
   const { theme, toggle: toggleTheme } = useTheme();
+  const topicLanding = topicSlug ? problemTopicLandingMap[topicSlug] : null;
   const [activeLibraryItem, setActiveLibraryItem] = React.useState("Library");
   const bannerRef = React.useRef(null);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
@@ -257,12 +317,16 @@ export default function ProblemsPage() {
       behavior: "smooth",
     });
   };
-  const [activeGroup, setActiveGroup] = React.useState("All Topics");
+  const [activeGroup, setActiveGroup] = React.useState(
+    topicLanding?.group || "All Topics",
+  );
   const [searchTerm, setSearchTerm] = React.useState("");
   const [difficulty, setDifficulty] = React.useState(
     problemDifficultyOptions[0],
   );
-  const [topicFilter, setTopicFilter] = React.useState(problemFilterGroups[0]);
+  const [topicFilter, setTopicFilter] = React.useState(
+    topicLanding?.group || problemFilterGroups[0],
+  );
   const [statusFilter, setStatusFilter] = React.useState(
     problemStatusOptions[0],
   );
@@ -275,6 +339,19 @@ export default function ProblemsPage() {
     () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   );
   const deferredSearch = React.useDeferredValue(searchTerm);
+
+  React.useEffect(() => {
+    const nextGroup = topicLanding?.group || "All Topics";
+    setActiveGroup(nextGroup);
+    setTopicFilter(nextGroup);
+  }, [topicLanding]);
+
+  React.useEffect(() => {
+    if (!topicLanding) return;
+    trackTopicEngagement(topicLanding.group, "landing_view", {
+      landing_slug: topicSlug,
+    });
+  }, [topicLanding, topicSlug]);
 
   const { snapshot, recordAttempt, setProblemSolved, monthMatrix } =
     useLearningProgress({
@@ -371,6 +448,30 @@ export default function ProblemsPage() {
     )
     .slice(0, 4);
 
+  const handleRecordAttempt = React.useCallback(
+    (problem) => {
+      trackPracticeEngagement("record_attempt", {
+        problem_id: problem.id,
+        problem_title: problem.title,
+        problem_topic: problem.topic,
+      });
+      recordAttempt(problem);
+    },
+    [recordAttempt],
+  );
+
+  const handleSetProblemSolved = React.useCallback(
+    (problem, solved) => {
+      trackPracticeEngagement(solved ? "mark_solved" : "mark_unsolved", {
+        problem_id: problem.id,
+        problem_title: problem.title,
+        problem_topic: problem.topic,
+      });
+      setProblemSolved(problem, solved);
+    },
+    [setProblemSolved],
+  );
+
   return (
     <div className={`problems-page theme-${theme}`}>
       <div className="problems-backdrop problems-backdrop-left" />
@@ -382,10 +483,10 @@ export default function ProblemsPage() {
         <aside className="problems-sidebar">
           <div className="problems-sidebar-brand">
             <span className="problems-sidebar-badge">Practice Arena</span>
-            <h1>Problems</h1>
+            <h1>{topicLanding?.title || "Problems"}</h1>
             <p>
-              LeetCode-style digital logic practice with activity, progress, and
-              topic depth.
+              {topicLanding?.description ||
+                "LeetCode-style digital logic practice with activity, progress, and topic depth."}
             </p>
           </div>
 
@@ -418,59 +519,25 @@ export default function ProblemsPage() {
             })}
           </nav>
 
-          <section className="problems-sidebar-foot">
-            <div>
-              <strong>{snapshot.summary.solvedProblems}</strong>
-              <span>Solved</span>
-            </div>
-            <div>
-              <strong>{snapshot.summary.attemptedProblems}</strong>
-              <span>Attempted</span>
-            </div>
-            <div>
-              <strong>{snapshot.summary.streaks.current}</strong>
-              <span>Streak</span>
-            </div>
-          </section>
+
         </aside>
 
         <section className="problems-center">
           <div className="problems-banner-slider">
-            {canScrollLeft && (
-              <button
-                type="button"
-                className="banner-slider-arrow banner-slider-arrow-left"
-                onClick={() => scrollBanner(-1)}
-                aria-label="Scroll left"
-              >
-                <ChevronLeft size={20} />
-              </button>
-            )}
-
-            <div className="problems-banner-row" ref={bannerRef}>
-              {problemBannerCards.map((card) => (
-                <article
-                  key={card.title}
-                  className="problems-banner-card"
-                  style={{ background: card.gradient }}
+            <div className="problems-banner-row banner-marquee" ref={bannerRef}>
+              {[...problemBannerCards, ...problemBannerCards].map((card, idx) => (
+                <Link
+                  key={`${card.title}-${idx}`}
+                  to={card.path}
+                  className="problems-banner-card banner-card-animated"
+                  style={{ background: card.gradient, textDecoration: 'none' }}
                 >
                   <span>{card.eyebrow}</span>
                   <h2>{card.title}</h2>
                   <p>{card.description}</p>
-                </article>
+                </Link>
               ))}
             </div>
-
-            {canScrollRight && (
-              <button
-                type="button"
-                className="banner-slider-arrow banner-slider-arrow-right"
-                onClick={() => scrollBanner(1)}
-                aria-label="Scroll right"
-              >
-                <ChevronRight size={20} />
-              </button>
-            )}
           </div>
 
           <div className="problems-filter-chip-row">
@@ -482,12 +549,33 @@ export default function ProblemsPage() {
                 onClick={() => {
                   setActiveGroup(group);
                   setTopicFilter(group);
+                  trackPracticeEngagement("topic_filter_click", {
+                    filter_group: group,
+                  });
                 }}
               >
                 {group}
               </button>
             ))}
           </div>
+
+          {topicLanding ? (
+            <section className="problems-widget" aria-labelledby="topic-cluster-links">
+              <div className="problems-widget-head">
+                <div>
+                  <span className="problems-widget-label">Topic Cluster</span>
+                  <h2 id="topic-cluster-links">Related Tutorials</h2>
+                </div>
+              </div>
+              <div className="selected-problem-tags">
+                {topicLanding.links.map((link) => (
+                  <Link key={link.to} to={link.to}>
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <section className="problems-toolbar">
             <label className="problems-search">
@@ -496,7 +584,14 @@ export default function ProblemsPage() {
                 type="search"
                 placeholder="Search problems, tags, circuits, latches..."
                 value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
+                onChange={(event) => {
+                  setSearchTerm(event.target.value);
+                  if (event.target.value.length > 2) {
+                    trackPracticeEngagement("search_query", {
+                      query_length: event.target.value.length,
+                    });
+                  }
+                }}
               />
             </label>
 
@@ -592,6 +687,11 @@ export default function ProblemsPage() {
                         onClick={() => {
                           setSelectedProblemId(problem.id);
                           setActiveProblem(problem);
+                          trackPracticeEngagement("open_problem", {
+                            problem_id: problem.id,
+                            problem_title: problem.title,
+                            problem_topic: problem.topic,
+                          });
                         }}
                       >
                         <td>{problem.listId}</td>
@@ -627,11 +727,11 @@ export default function ProblemsPage() {
                             onClick={(event) => {
                               event.stopPropagation();
                               if (solved) {
-                                setProblemSolved(problem, false);
+                                handleSetProblemSolved(problem, false);
                               } else if (attempted) {
-                                setProblemSolved(problem, true);
+                                handleSetProblemSolved(problem, true);
                               } else {
-                                recordAttempt(problem);
+                                handleRecordAttempt(problem);
                               }
                             }}
                           >
@@ -711,8 +811,8 @@ export default function ProblemsPage() {
                 ? snapshot.state.problems[selectedProblem.id]
                 : null
             }
-            onAttempt={recordAttempt}
-            onToggleSolved={setProblemSolved}
+            onAttempt={handleRecordAttempt}
+            onToggleSolved={handleSetProblemSolved}
           />
 
           <section className="problems-widget">

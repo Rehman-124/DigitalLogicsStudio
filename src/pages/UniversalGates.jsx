@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ToolLayout from '../components/ToolLayout';
+import AdvancedLogicLayout from './AdvancedLogic/AdvancedLogicLayout';
 import ExplanationBlock from '../components/ExplanationBlock';
 import InteractiveDemo from '../components/InteractiveDemo';
 import CircuitModal from '../components/CircuitModal';
@@ -64,9 +64,24 @@ const UniversalGates = () => {
   const currentGate = gateImplementations[selectedGate];
 
   return (
-    <ToolLayout
+    <AdvancedLogicLayout
       title="Universal Gates"
       subtitle="Deep dive into NAND and NOR gates - the building blocks of all digital logic"
+      intro="Follow a unified advanced-logic lesson path while exploring how NAND and NOR gates can synthesize every other logic function."
+      highlights={[
+        {
+          title: "Single-Gate Universality",
+          text: "See why NAND and NOR can build complete digital systems on their own.",
+        },
+        {
+          title: "Interactive Verification",
+          text: "Toggle truth tables and compare reusable gate constructions side by side.",
+        },
+        {
+          title: "Design Motivation",
+          text: "Connect universal gates to manufacturing efficiency and logic-family choices.",
+        },
+      ]}
     >
       <div className="kmap-card" style={{ marginBottom: '1rem' }}>
         <button
@@ -490,7 +505,7 @@ const UniversalGates = () => {
           }
         }
       `}</style>
-    </ToolLayout>
+    </AdvancedLogicLayout>
   );
 };
 

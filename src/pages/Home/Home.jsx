@@ -12,16 +12,24 @@ import { buildSearchIndex, searchIndexedItems } from "../../utils/search";
 import "./Home.css";
 const Home = () => {
   const { theme, toggle: toggleTheme } = useTheme();
-  const [searchTerm, setSearchTerm] = React.useState("");
   const [authAlert, setAuthAlert] = React.useState("");
-  const deferredSearchTerm = React.useDeferredValue(searchTerm);
   const resultsRef = React.useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const initialQuery = React.useMemo(
+    () => new URLSearchParams(location.search).get("q") || "",
+    [location.search],
+  );
+  const [searchTerm, setSearchTerm] = React.useState(initialQuery);
+  const deferredSearchTerm = React.useDeferredValue(searchTerm);
   const indexedHomeData = React.useMemo(
     () => homeData.map((item) => buildSearchIndex(item)),
     [],
   );
+
+  React.useEffect(() => {
+    setSearchTerm(initialQuery);
+  }, [initialQuery]);
 
   React.useEffect(() => {
     const incomingMessage = location.state?.authMessage;
@@ -81,6 +89,10 @@ const Home = () => {
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
+    const nextSearch = searchTerm.trim()
+      ? `?q=${encodeURIComponent(searchTerm.trim())}`
+      : "";
+    navigate({ pathname: "/", search: nextSearch }, { replace: true });
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 

@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from "react";
-import ToolLayout from "../../components/ToolLayout";
-import ExplanationBlock from "../../components/ExplanationBlock";
+import BALayout from "./components/BALayout";
 import ControlPanel from "../../components/ControlPanel";
 import ControlGroup from "../../components/ControlGroup";
 import CircuitModal from "../../components/CircuitModal";
@@ -26,14 +25,15 @@ const MaxtermsPage = () => {
   const maxs = useMemo(() => listMaxterms(variables, expr), [variables, expr]);
 
   return (
-    <ToolLayout title="Maxterms" subtitle="Where the function outputs 0">
-      <ExplanationBlock title="Understanding Maxterms">
-        <p className="explanation-intro">
-          Maxterms are the complementary concept to minterms in Boolean algebra.
-          They represent specific input combinations where a Boolean function
-          outputs 0. Each maxterm corresponds to exactly one row in the truth
-          table where the function is false.
-        </p>
+    <BALayout
+      title="Maxterms"
+      subtitle="Where the function outputs 0"
+      intro="Maxterms are the complementary concept to minterms. They represent specific input combinations where a Boolean function outputs 0. Each maxterm corresponds to exactly one row in the truth table where the function is false."
+    >
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Understanding Maxterms</h2>
+        </div>
         <div className="info-card">
           <h4>Maxterm Properties:</h4>
           <ul>
@@ -76,53 +76,40 @@ const MaxtermsPage = () => {
           <p>
             Maxterms provide the foundation for Product of Sums (POS)
             representation. The product of all maxterms where F=0 creates the
-            canonical POS form, which is essential for certain optimization
-            techniques and circuit implementations.
+            canonical POS form, essential for certain optimization techniques
+            and circuit implementations.
           </p>
         </div>
-      </ExplanationBlock>
-      <ControlPanel>
-        <ControlGroup label="Expression (SOP)">
-          <input
-            type="text"
-            className="control-input"
-            value={expr}
-            onChange={(e) => setExpr(e.target.value)}
-          />
-        </ControlGroup>
-      </ControlPanel>
+      </section>
 
-      <ExplanationBlock title="Maxterm Analysis">
-        <p className="explanation-intro">
-          Current maxterm indexes:{" "}
-          <span className="highlight">{maxs.join(", ") || "—"}</span>
-        </p>
-        <div className="info-card">
-          <h4>What These Indexes Mean:</h4>
-          <p>
-            Each number represents a truth table row where the function outputs
-            0:
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Interactive Maxterm Finder</h2>
+        </div>
+        <ControlPanel>
+          <ControlGroup label="Expression (SOP)">
+            <input
+              type="text"
+              className="control-input"
+              value={expr}
+              onChange={(e) => setExpr(e.target.value)}
+            />
+          </ControlGroup>
+        </ControlPanel>
+
+        <div style={{ marginTop: "1rem" }}>
+          <p className="explanation-intro">
+            Current maxterm indexes:{" "}
+            <span className="highlight">{maxs.join(", ") || "—"}</span>
           </p>
-          <ul>
-            <li>Index 0 = Input combination 000 (A=0, B=0, C=0) → A + B + C</li>
-            <li>
-              Index 3 = Input combination 011 (A=0, B=1, C=1) → A + B' + C'
-            </li>
-            <li>
-              Index 7 = Input combination 111 (A=1, B=1, C=1) → A' + B' + C'
-            </li>
-          </ul>
+          <div className="info-card">
+            <h4>From Maxterms to Expression:</h4>
+            <p>If maxterms are [0, 2, 5], the canonical POS is:</p>
+            <p>F = M₀ • M₂ • M₅ = (A + B + C) • (A + B' + C) • (A' + B + C')</p>
+          </div>
         </div>
-        <div className="example-box">
-          <h4>From Maxterms to Expression:</h4>
-          <p>If maxterms are [0, 2, 5], the canonical POS is:</p>
-          <p>F = M₀ • M₂ • M₅ = (A + B + C) • (A + B' + C) • (A' + B + C')</p>
-          <p>This can often be simplified using Boolean algebra!</p>
-        </div>
-      </ExplanationBlock>
 
-      <ExplanationBlock title="Interactive Examples">
-        <div className="interactive-example">
+        <div className="interactive-example" style={{ marginTop: "1rem" }}>
           <h4>Try These Expressions:</h4>
           <div className="example-buttons">
             <button
@@ -151,15 +138,12 @@ const MaxtermsPage = () => {
             </button>
           </div>
         </div>
-        <div className="example-box">
+
+        <div className="example-box" style={{ marginTop: "1rem" }}>
           <h4>Practice Problem:</h4>
           <p>What are the maxterms for F = A • (B + C)?</p>
           <details>
             <summary>Show Solution</summary>
-            <p>
-              <strong>Truth Table Analysis:</strong>
-            </p>
-            <p>F = 0 when: A=0 (any B,C) OR (A=1 AND B=0 AND C=0)</p>
             <p>
               <strong>Maxterms:</strong> [0, 1, 2, 3, 4]
             </p>
@@ -168,37 +152,45 @@ const MaxtermsPage = () => {
             </p>
           </details>
         </div>
-      </ExplanationBlock>
+      </section>
 
-      <div className="binary-table-container">
-        <table className="binary-table">
-          <thead className="binary-table-header">
-            <tr>
-              {tt.headers.map((h) => (
-                <th key={h}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {tt.rows.map((row, i) => (
-              <tr key={i} className="binary-table-row">
-                {row.map((c, j) => (
-                  <td
-                    key={j}
-                    className={`binary-table-cell ${j === tt.headers.length - 1 && c === 0 ? "binary-table-cell-secondary" : ""}`}
-                  >
-                    {c}
-                  </td>
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Truth Table</h2>
+        </div>
+        <div className="binary-table-container">
+          <table className="binary-table">
+            <thead className="binary-table-header">
+              <tr>
+                {tt.headers.map((h) => (
+                  <th key={h}>{h}</th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {tt.rows.map((row, i) => (
+                <tr key={i} className="binary-table-row">
+                  {row.map((c, j) => (
+                    <td
+                      key={j}
+                      className={`binary-table-cell ${j === tt.headers.length - 1 && c === 0 ? "binary-table-cell-secondary" : ""}`}
+                    >
+                      {c}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-      <ExplanationBlock title="Maxterm Applications">
+      <section className="ba-section">
+        <div className="ba-section-header">
+          <h2 className="ba-section-title">Maxterm Applications</h2>
+        </div>
         <div className="comparison-grid">
-          <div className="comparison-card">
+          <div className="info-card">
             <h5>Design Applications</h5>
             <ul>
               <li>NOR-based implementations</li>
@@ -207,7 +199,7 @@ const MaxtermsPage = () => {
               <li>POS optimization</li>
             </ul>
           </div>
-          <div className="comparison-card">
+          <div className="info-card">
             <h5>Optimization Uses</h5>
             <ul>
               <li>POS form minimization</li>
@@ -225,16 +217,15 @@ const MaxtermsPage = () => {
             better.
           </p>
         </div>
-      </ExplanationBlock>
-
-      <div className="kmap-card">
-        <button
-          className="kmap-btn kmap-btn-primary kmap-btn-full"
-          onClick={() => setOpen(true)}
-        >
-          🔌 Visualize Circuit
-        </button>
-      </div>
+        <div className="kmap-card" style={{ marginTop: "1rem" }}>
+          <button
+            className="kmap-btn kmap-btn-primary kmap-btn-full"
+            onClick={() => setOpen(true)}
+          >
+            🔌 Visualize Circuit
+          </button>
+        </div>
+      </section>
 
       <CircuitModal
         open={open}
@@ -242,7 +233,7 @@ const MaxtermsPage = () => {
         expression={expr}
         variables={variables}
       />
-    </ToolLayout>
+    </BALayout>
   );
 };
 

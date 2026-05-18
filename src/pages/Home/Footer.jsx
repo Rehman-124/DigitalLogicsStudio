@@ -7,7 +7,7 @@ const FOOTER_COLS = [
       { label: "Problems", to: "/problems" },
       { label: "Circuit Forge", to: "/boolforge" },
       { label: "K-Map Studio", to: "/kmapgenerator" },
-      { label: "Boolean Algebra", to: "/boolean-algebra" },
+      { label: "Boolean Algebra", to: "/boolean/overview" },
       { label: "Number Systems", to: "/numbersystemcalculator" },
     ],
   },
@@ -15,8 +15,9 @@ const FOOTER_COLS = [
     heading: "Learn",
     links: [
       { label: "Sequential Circuits", to: "/sequential/intro" },
-      { label: "Registers & Transfers", to: "/registers/intro" }, // ← NEW
-      { label: "Logic Gates", to: "/gates" },
+      { label: "Registers & Transfers", to: "/registers/intro" },
+      { label: "Multiplexers", to: "/mux" },
+      { label: "Demultiplexers", to: "/demux" },
       { label: "Arithmetic", to: "/arithmetic/binary-adders" },
       { label: "Timing Diagrams", to: "/timing-diagrams" },
     ],

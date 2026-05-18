@@ -8,7 +8,7 @@
  *   segs  : { a,b,c,d,e,f,g } — 1 = ON, 0 = OFF
  *   digit : number             — decimal digit shown below (cosmetic only)
  */
-import React from "react";
+
 import { COLORS } from "../../shared/theme.js";
 
 const SevenSeg = ({ segs }) => {
