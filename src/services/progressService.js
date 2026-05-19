@@ -10,6 +10,7 @@
  */
 
 import apiClient from "./apiClient";
+import { isPrerendering } from "../utils/prerender";
 
 const guestKey = "guest";
 
@@ -173,10 +174,11 @@ const snapshotFor = (userKey, { topics = [], problems = [] } = {}) => {
 // ─── Remote helpers ───────────────────────────────────────────────────────────
 
 const isTest = () => process.env.NODE_ENV === "test";
+const isStaticRender = () => isTest() || isPrerendering();
 
 /** POST to the API, swallow errors (offline / unauthenticated) */
 const tryRemotePost = async (path, payload = {}) => {
-  if (isTest()) return null;
+  if (isStaticRender()) return null;
   try {
     await apiClient.post(path, payload);
   } catch {
@@ -211,7 +213,7 @@ const progressService = {
    * Call this once after login / on app mount (authenticated users only).
    */
   loadFromDB: async (userKey) => {
-    if (isTest() || userKey === guestKey) return;
+    if (isStaticRender() || userKey === guestKey) return;
     try {
       const { data } = await apiClient.get("/progress/snapshot");
       if (data?.success && data.state) {
@@ -386,8 +388,15 @@ const progressService = {
     const dateKey = toDateKey();
     const current = mergeTopicState(topic, state.topics[topic.id]);
     const completedSet = new Set(current.completedSubtopics);
+    const equivalentIds = [
+      subtopicId,
+      ...Object.entries(topic?.subtopicAliases || {})
+        .filter(([, canonicalId]) => canonicalId === subtopicId)
+        .map(([legacyId]) => legacyId),
+    ];
+    const isCompleted = equivalentIds.some((id) => completedSet.has(id));
 
-    if (completedSet.has(subtopicId)) completedSet.delete(subtopicId);
+    if (isCompleted) equivalentIds.forEach((id) => completedSet.delete(id));
     else completedSet.add(subtopicId);
 
     current.completedSubtopics = Array.from(completedSet);
@@ -417,6 +426,7 @@ const progressService = {
     await tryRemotePost(`/progress/topics/${topic.id}/subtopics/${subtopicId}`, {
       title: topic.title,
       subtopicId,
+      equivalentSubtopicIds: equivalentIds,
       totalSubtopics: topic?.links?.length || 0,
     });
 

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
-import ToolLayout from "../../components/ToolLayout";
+import NSLayout from "./components/NSLayout";
 import ControlPanel from "../../components/ControlPanel";
 import ControlGroup from "../../components/ControlGroup";
 import ExplanationBlock from "../../components/ExplanationBlock";
 
-const NumberSystemCalculator = () => {
+export default function NumberSystemCalculator() {
   const [numberSystem, setNumberSystem] = useState("");
   const [binaryRepresentation, setBinaryRepresentation] =
     useState("twos-complement");
@@ -549,9 +549,10 @@ const NumberSystemCalculator = () => {
   };
 
   return (
-    <ToolLayout
-      title="Number System Calculator"
+    <NSLayout
+      title="NS Calculator"
       subtitle="Visual arithmetic across different bases"
+      intro="Perform addition, subtraction, multiplication, and division in binary, octal, decimal, or hexadecimal — with step-by-step carry/borrow visualization."
     >
       <ControlPanel>
         <ControlGroup label="Number System">
@@ -668,8 +669,6 @@ const NumberSystemCalculator = () => {
           </div>
         </div>
       )}
-    </ToolLayout>
+    </NSLayout>
   );
-};
-
-export default NumberSystemCalculator;
+}

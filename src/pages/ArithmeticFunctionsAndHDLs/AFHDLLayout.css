@@ -1064,3 +1064,82 @@
     transition: none;
   }
 }
+
+.afhdl-footer-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.afhdl-mark-read-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 48px;
+  padding: 0.78rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(74, 222, 128, 0.26);
+  background: rgba(22, 101, 52, 0.14);
+  color: #d1fae5;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    background 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.afhdl-mark-read-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(22, 101, 52, 0.2);
+  border-color: rgba(74, 222, 128, 0.4);
+}
+
+.afhdl-mark-read-btn.is-read {
+  background: linear-gradient(
+    135deg,
+    rgba(22, 101, 52, 0.32),
+    rgba(15, 118, 110, 0.28)
+  );
+  border-color: rgba(74, 222, 128, 0.52);
+  color: #ecfdf5;
+}
+
+.afhdl-mark-read-btn.is-read svg {
+  color: #4ade80;
+}
+
+[data-theme="light"] .afhdl-mark-read-btn {
+  background: rgba(22, 163, 74, 0.08);
+  color: #166534;
+  border-color: rgba(22, 163, 74, 0.2);
+}
+
+[data-theme="light"] .afhdl-mark-read-btn:hover {
+  background: rgba(22, 163, 74, 0.14);
+}
+
+[data-theme="light"] .afhdl-mark-read-btn.is-read {
+  color: #14532d;
+  background: linear-gradient(
+    135deg,
+    rgba(34, 197, 94, 0.16),
+    rgba(45, 212, 191, 0.12)
+  );
+}
+
+@media (max-width: 720px) {
+  .afhdl-footer-right {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .afhdl-mark-read-btn {
+    width: 100%;
+  }
+}

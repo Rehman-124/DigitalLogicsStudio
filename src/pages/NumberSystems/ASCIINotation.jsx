@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ToolLayout from "../../components/ToolLayout";
+import NSLayout from "./components/NSLayout";
 import ControlPanel from "../../components/ControlPanel";
 import ControlGroup from "../../components/ControlGroup";
 import ResultCard from "../../components/ResultCard";
@@ -31,14 +31,15 @@ const toAsciiRows = (text) => {
   return rows;
 };
 
-const ASCIINotation = () => {
+export default function ASCIINotation() {
   const [input, setInput] = useState("");
   const rows = input ? toAsciiRows(input) : [];
 
   return (
-    <ToolLayout
+    <NSLayout
       title="ASCII Notation"
       subtitle="See decimal, hex, and binary codes for characters"
+      intro="ASCII assigns each printable and control character a unique 7-bit integer code. Type anything below to see its full breakdown."
     >
       <ControlPanel>
         <ControlGroup label="Text">
@@ -97,8 +98,6 @@ const ASCIINotation = () => {
           </ExplanationBlock>
         </ResultCard>
       )}
-    </ToolLayout>
+    </NSLayout>
   );
-};
-
-export default ASCIINotation;
+}

@@ -14,6 +14,7 @@
  *   7. Quiz
  */
 import React, { useState, useMemo } from "react";
+import CombinationalLayout from "../../CombinationalCircuits/CombinationalLayout";
 
 // ── Shared components ──────────────────────────────────────────────────────────
 import Section   from "../shared/components/Section.jsx";
@@ -76,15 +77,31 @@ const EncoderPage = () => {
   };
 
   return (
-    <div
-      style={{
-        fontFamily: "'Segoe UI', system-ui, sans-serif",
-        background: COLORS.pageBg,
-        minHeight: "100vh",
-        color: COLORS.textPrimary,
-        padding: "28px 20px 80px",
-      }}
+    <CombinationalLayout
+      title="Encoder"
+      subtitle="Signal compression, binary indexing, and priority encoding"
+      intro="Work through interactive encoder lessons that explain how active input lines collapse into compact binary outputs used throughout digital systems."
+      highlights={[
+        {
+          title: "Binary Index Thinking",
+          text: "Learn the fast mental model for deriving encoder equations from input indices.",
+        },
+        {
+          title: "Priority Conflicts",
+          text: "See how real encoders handle simultaneous active inputs without ambiguity.",
+        },
+        {
+          title: "System Applications",
+          text: "Connect the theory to keyboards, interrupts, ADCs, and routing logic.",
+        },
+      ]}
     >
+      <div
+        style={{
+          fontFamily: "'Segoe UI', system-ui, sans-serif",
+          color: COLORS.textPrimary,
+        }}
+      >
       <style>{`
         * { box-sizing: border-box; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -92,19 +109,6 @@ const EncoderPage = () => {
         ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.4); border-radius: 3px; }
         button:hover { filter: brightness(1.1); }
       `}</style>
-
-      {/* ── Page header ── */}
-      <div style={{ maxWidth: "900px", margin: "0 auto 32px" }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: "10px", padding: "6px 14px", borderRadius: "20px", background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.3)", marginBottom: "16px" }}>
-          <span style={{ color: COLORS.indigoLight, fontSize: "0.78rem", fontWeight: "700", letterSpacing: "0.1em" }}>DIGITAL LOGIC</span>
-        </div>
-        <h1 style={{ fontSize: "2.2rem", fontWeight: "800", background: "linear-gradient(135deg, #a5b4fc, #38bdf8, #34d399)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", margin: "0 0 12px", lineHeight: 1.2 }}>
-          Encoders — Complete Guide
-        </h1>
-        <p style={{ color: "#64748b", fontSize: "1rem", lineHeight: "1.6", margin: 0 }}>
-          Interactive simulator • Signal flow animations • Priority conflict resolver • Binary-index explorer • Quiz with hints
-        </p>
-      </div>
 
       <div style={{ maxWidth: "900px", margin: "0 auto" }}>
 
@@ -229,6 +233,7 @@ const EncoderPage = () => {
       {/* Floating tips button */}
       <TipsPanel tips={ENCODER_TIPS} />
     </div>
+    </CombinationalLayout>
   );
 };
 

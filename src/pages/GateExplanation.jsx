@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import ToolLayout from '../components/ToolLayout';
+import AdvancedLogicLayout from './AdvancedLogic/AdvancedLogicLayout';
 import ExplanationBlock from '../components/ExplanationBlock';
 import CircuitModal from '../components/CircuitModal';
 import { gateSymbols } from '../data/gates';
@@ -21,7 +21,25 @@ const GateExplanation = () => {
   ];
 
   return (
-    <ToolLayout title="Logic Gates" subtitle="Symbols, behavior, and intuition">
+    <AdvancedLogicLayout
+      title="Logic Gates"
+      subtitle="Symbols, behavior, and intuition"
+      intro="Review the core gate library inside the same premium learning shell used by the rest of the platform so even reference material feels integrated."
+      highlights={[
+        {
+          title: "Visual Library",
+          text: "Scan the fundamental gate set and keep symbols paired with behavior at a glance.",
+        },
+        {
+          title: "Behavior Intuition",
+          text: "Use concise descriptions to connect each symbol to its logical meaning.",
+        },
+        {
+          title: "Circuit Exploration",
+          text: "Jump from reference to live experimentation without leaving the lesson flow.",
+        },
+      ]}
+    >
       <div className="kmap-card" style={{ marginBottom: '1rem' }}>
         <button
           className="kmap-btn kmap-btn-primary kmap-btn-full"
@@ -82,7 +100,7 @@ const GateExplanation = () => {
           margin: 0;
         }
       `}</style>
-    </ToolLayout>
+    </AdvancedLogicLayout>
   );
 };
 

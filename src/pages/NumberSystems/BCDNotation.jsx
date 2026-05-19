@@ -1,28 +1,27 @@
 import React, { useState } from "react";
-import ToolLayout from "../../components/ToolLayout";
+import NSLayout from "./components/NSLayout";
 import ControlPanel from "../../components/ControlPanel";
 import ControlGroup from "../../components/ControlGroup";
 import ResultCard from "../../components/ResultCard";
 import ExplanationBlock from "../../components/ExplanationBlock";
 
 const toBcdDigits = (value) => {
-  if (!/^[0-9]+$/.test(value)) {
-    return null;
-  }
+  if (!/^[0-9]+$/.test(value)) return null;
   return value.split("").map((d) => ({
     digit: d,
     bcd: parseInt(d, 10).toString(2).padStart(4, "0"),
   }));
 };
 
-const BCDNotation = () => {
+export default function BCDNotation() {
   const [input, setInput] = useState("");
   const digits = input ? toBcdDigits(input) : null;
 
   return (
-    <ToolLayout
+    <NSLayout
       title="BCD Notation"
       subtitle="Binary Coded Decimal representation of decimal digits"
+      intro="In BCD each decimal digit is stored independently as a 4-bit binary group, preserving digit boundaries that pure binary would lose."
     >
       <ControlPanel>
         <ControlGroup label="Decimal number">
@@ -32,9 +31,7 @@ const BCDNotation = () => {
             value={input}
             onChange={(e) => {
               const val = e.target.value.trim();
-              if (val === "" || /^[0-9]+$/.test(val)) {
-                setInput(val);
-              }
+              if (val === "" || /^[0-9]+$/.test(val)) setInput(val);
             }}
             placeholder="Enter a non‑negative integer, e.g. 4095"
           />
@@ -81,28 +78,23 @@ const BCDNotation = () => {
 
           {digits && (
             <ExplanationBlock title="Combined BCD word">
-              <>
-                <p className="explanation-intro">
-                  Joining all digit blocks left‑to‑right gives the full BCD
-                  representation.
-                </p>
-                <p className="final-result">
-                  <strong>{input}</strong>
-                  {digits.map((d) => d.bcd).join(" ")}
-                </p>
-                <p>
-                  Notice that BCD is different from the pure binary value of the
-                  number – it preserves the{" "}
-                  <span className="highlight">decimal digit boundaries</span>,
-                  which is useful in display hardware and decimal arithmetic.
-                </p>
-              </>
+              <p className="explanation-intro">
+                Joining all digit blocks left‑to‑right gives the full BCD
+                representation.
+              </p>
+              <p className="final-result">
+                <strong>{input}</strong> → {digits.map((d) => d.bcd).join(" ")}
+              </p>
+              <p>
+                Notice that BCD is different from the pure binary value of the
+                number — it preserves the{" "}
+                <span className="highlight">decimal digit boundaries</span>,
+                making conversion back to decimal trivial.
+              </p>
             </ExplanationBlock>
           )}
         </ResultCard>
       )}
-    </ToolLayout>
+    </NSLayout>
   );
-};
-
-export default BCDNotation;
+}
