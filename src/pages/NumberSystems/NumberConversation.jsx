@@ -138,9 +138,187 @@ export default function NumberConverter() {
         { id: 'hex-to-oct', label: 'Hexadecimal → Octal' },
     ];
 
+    const baseMeta = {
+        bin: { name: 'Binary', base: 2, value: binary || '101010' },
+        dec: { name: 'Decimal', base: 10, value: decimal || '42' },
+        oct: { name: 'Octal', base: 8, value: octal || '52' },
+        hex: { name: 'Hexadecimal', base: 16, value: hexadecimal || '2A' },
+    };
+
+    const normalizeNumberParts = (value) => {
+        const trimmed = String(value || '0').trim();
+        const negative = trimmed.startsWith('-');
+        const unsigned = negative ? trimmed.slice(1) : trimmed;
+        const [integer = '0', fraction = ''] = unsigned.split('.');
+
+        return {
+            negative,
+            integer: integer || '0',
+            fraction,
+            display: `${negative ? '-' : ''}${integer || '0'}${fraction ? `.${fraction}` : ''}`,
+        };
+    };
+
+    const digitValue = (digit, base) => parseInt(digit, base);
+
+    const formatBaseResult = (decimalValue, targetBase) => {
+        if (targetBase === 10) return decimalValue.toString();
+
+        const sign = decimalValue < 0 ? '-' : '';
+        const absolute = Math.abs(decimalValue);
+        const integer = Math.trunc(absolute);
+        const fraction = absolute - integer;
+        const integerPart = integer.toString(targetBase).toUpperCase();
+        const fractionPart = fraction > 0
+            ? convertFractionalPart(fraction, targetBase).result
+            : '';
+
+        return `${sign}${integerPart}${fractionPart ? `.${fractionPart}` : ''}`;
+    };
+
+    const explainToDecimal = (source, sourceKey) => {
+        const { base, name } = source;
+        const parts = normalizeNumberParts(source.value);
+        const intDigits = parts.integer.split('');
+        const fracDigits = parts.fraction.split('');
+        const steps = [
+            `Start with ${parts.display} in ${name}. Its base is ${base}.`,
+        ];
+        let total = 0;
+
+        if (intDigits.length) {
+            const highestPower = intDigits.length - 1;
+            const integerTerms = intDigits.map((digit, index) => {
+                const power = highestPower - index;
+                const value = digitValue(digit, base) * Math.pow(base, power);
+                total += value;
+                return `${digit} x ${base}^${power} = ${value}`;
+            });
+            steps.push(`Expand the integer part from left to right: ${integerTerms.join(' + ')}.`);
+        }
+
+        if (fracDigits.length) {
+            const fractionTerms = fracDigits.map((digit, index) => {
+                const power = -(index + 1);
+                const value = digitValue(digit, base) * Math.pow(base, power);
+                total += value;
+                return `${digit} x ${base}^${power} = ${value}`;
+            });
+            steps.push(`Expand the fractional part with negative powers: ${fractionTerms.join(' + ')}.`);
+        }
+
+        const signedTotal = parts.negative ? -total : total;
+        if (parts.negative) {
+            steps.push(`Apply the negative sign: -${total} = ${signedTotal}.`);
+        }
+        steps.push(`${parts.display} (${sourceKey.toUpperCase()}) = ${signedTotal} (DEC).`);
+
+        return { decimalValue: signedTotal, steps };
+    };
+
+    const explainFromDecimal = (source, target) => {
+        const decimalValue = Number.parseFloat(source.value || '0');
+        const targetBase = target.base;
+        const targetName = target.name;
+        const steps = [`Start with ${decimalValue} in Decimal.`];
+        const sign = decimalValue < 0 ? '-' : '';
+        const absolute = Math.abs(decimalValue);
+        const integer = Math.trunc(absolute);
+        let quotient = integer;
+        const remainders = [];
+
+        if (integer === 0) {
+            steps.push(`Integer part is 0, so the ${targetName} integer part is 0.`);
+        } else {
+            while (quotient > 0) {
+                const remainder = quotient % targetBase;
+                const nextQuotient = Math.floor(quotient / targetBase);
+                remainders.push(remainder.toString(targetBase).toUpperCase());
+                steps.push(`${quotient} / ${targetBase} = ${nextQuotient} remainder ${remainder.toString(targetBase).toUpperCase()}.`);
+                quotient = nextQuotient;
+            }
+            steps.push(`Read remainders from bottom to top: ${remainders.slice().reverse().join('')}.`);
+        }
+
+        let fraction = absolute - integer;
+        const fractionDigits = [];
+        if (fraction > 0) {
+            for (let step = 1; step <= 8 && fraction > 0; step++) {
+                const multiplied = fraction * targetBase;
+                const digit = Math.floor(multiplied);
+                const digitText = digit.toString(targetBase).toUpperCase();
+                fractionDigits.push(digitText);
+                steps.push(`${fraction.toFixed(10)} x ${targetBase} = ${multiplied.toFixed(10)}; take ${digitText}.`);
+                fraction = multiplied - digit;
+            }
+        }
+
+        const integerPart = integer === 0 ? '0' : remainders.slice().reverse().join('');
+        const result = `${sign}${integerPart}${fractionDigits.length ? `.${fractionDigits.join('')}` : ''}`;
+        steps.push(`${source.value || '0'} (DEC) = ${result} (${targetName.toUpperCase()}).`);
+
+        return { result, steps };
+    };
+
+    const explainGroupedConversion = (source, sourceKey, target, targetKey) => {
+        const parts = normalizeNumberParts(source.value);
+        const groupSize = targetKey === 'oct' ? 3 : 4;
+        const paddedInteger = parts.integer.padStart(Math.ceil(parts.integer.length / groupSize) * groupSize, '0');
+        const paddedFraction = parts.fraction
+            ? parts.fraction.padEnd(Math.ceil(parts.fraction.length / groupSize) * groupSize, '0')
+            : '';
+        const integerGroups = paddedInteger.match(new RegExp(`.{1,${groupSize}}`, 'g')) || ['0'];
+        const fractionGroups = paddedFraction.match(new RegExp(`.{1,${groupSize}}`, 'g')) || [];
+        const convertGroup = (group) => parseInt(group, 2).toString(target.base).toUpperCase();
+        const result = `${parts.negative ? '-' : ''}${integerGroups.map(convertGroup).join('').replace(/^0+(?=\w)/, '') || '0'}${fractionGroups.length ? `.${fractionGroups.map(convertGroup).join('')}` : ''}`;
+        const steps = [
+            `Start with ${parts.display} in ${source.name}.`,
+            `${target.name} digits use groups of ${groupSize} binary bits.`,
+            `Pad and group the integer part: ${paddedInteger} -> ${integerGroups.join(' ')}.`,
+            `Convert each group: ${integerGroups.map((group) => `${group}=${convertGroup(group)}`).join(', ')}.`,
+        ];
+
+        if (fractionGroups.length) {
+            steps.push(`Pad and group the fractional part: ${paddedFraction} -> ${fractionGroups.join(' ')}.`);
+            steps.push(`Convert each fractional group: ${fractionGroups.map((group) => `${group}=${convertGroup(group)}`).join(', ')}.`);
+        }
+
+        steps.push(`${parts.display} (${sourceKey.toUpperCase()}) = ${result} (${targetKey.toUpperCase()}).`);
+        return steps;
+    };
+
+    const explainViaDecimal = (source, sourceKey, target, targetKey) => {
+        const decimalExplanation = explainToDecimal(source, sourceKey);
+        const targetExplanation = explainFromDecimal(
+            { ...baseMeta.dec, value: decimalExplanation.decimalValue.toString() },
+            target,
+        );
+
+        return [
+            ...decimalExplanation.steps,
+            `Now convert ${decimalExplanation.decimalValue} from Decimal to ${target.name}.`,
+            ...targetExplanation.steps.slice(1),
+            `${source.value} (${sourceKey.toUpperCase()}) = ${formatBaseResult(decimalExplanation.decimalValue, target.base)} (${targetKey.toUpperCase()}).`,
+        ];
+    };
+
     const getExplanation = (conversion) => {
-        const examples = { decimal: decimal || '42', binary: binary || '101010', octal: octal || '52', hexadecimal: hexadecimal || '2A' };
-        return { title: conversion.label + ' Conversion', steps: [`Converting ${Object.values(examples).filter(Boolean)[0]} — type a value above to see live steps.`] };
+        const [sourceKey, targetKey] = conversion.id.split('-to-');
+        const source = baseMeta[sourceKey];
+        const target = baseMeta[targetKey];
+        let steps;
+
+        if (targetKey === 'dec') {
+            steps = explainToDecimal(source, sourceKey).steps;
+        } else if (sourceKey === 'dec') {
+            steps = explainFromDecimal(source, target).steps;
+        } else if (sourceKey === 'bin' && ['oct', 'hex'].includes(targetKey)) {
+            steps = explainGroupedConversion(source, sourceKey, target, targetKey);
+        } else {
+            steps = explainViaDecimal(source, sourceKey, target, targetKey);
+        }
+
+        return { title: conversion.label + ' Conversion', steps };
     };
 
     const handleConversionClick = (conversion) => { setSelectedConversion(conversion); setShowExplanation(true); };
