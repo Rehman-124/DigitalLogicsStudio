@@ -285,6 +285,7 @@
   min-height: 100%;
   background: color-mix(in srgb, var(--afhdl-surface-strong) 96%, transparent);
   border-right: 1px solid var(--afhdl-border);
+  transition: padding-top 0.28s ease;
 }
 
 /* Sidebar card — module overview */
@@ -977,20 +978,32 @@
    RESPONSIVE BREAKPOINTS
 ══════════════════════════════════════════════════════════════ */
 
-/* Desktop: show sidebar permanently beside content */
-@media (min-width: 900px) {
+/* Wide desktop: show sidebar permanently beside content */
+@media (min-width: 1280px) {
+  .afhdl-hamburger {
+    display: none;
+  }
+  .afhdl-overlay {
+    display: none;
+  }
   .afhdl-body {
     padding-left: var(--afhdl-sidebar-width);
   }
   .afhdl-sidebar {
-    position: sticky;
-    top: var(--afhdl-topbar-height);
+    position: fixed;
+    top: 0;
     left: 0;
-    height: calc(100vh - var(--afhdl-topbar-height));
+    height: 100vh;
     transform: translateX(0);
     width: var(--afhdl-sidebar-width);
-    margin-left: calc(-1 * var(--afhdl-sidebar-width));
+    margin-left: 0;
     flex-shrink: 0;
+  }
+  .afhdl-sidebar-inner {
+    padding-top: calc(var(--afhdl-topbar-height) + 1rem);
+  }
+  .afhdl-layout.is-scrolled .afhdl-sidebar-inner {
+    padding-top: 1rem;
   }
   .afhdl-main {
     padding: 1.5rem 1.5rem 3rem;
@@ -998,6 +1011,16 @@
   }
   .afhdl-category-pill {
     font-size: 0.92rem;
+  }
+}
+
+/* Laptop and tablet: keep navigation off-canvas so the hamburger is useful */
+@media (max-width: 1279px) {
+  .afhdl-sidebar {
+    width: min(86vw, 320px);
+  }
+  .afhdl-main {
+    width: min(980px, 100%);
   }
 }
 

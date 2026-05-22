@@ -127,7 +127,7 @@
   opacity: calc(var(--ghost-opacity) * 0.05);
 }
 
-.home-hero-content h2 {
+.home-hero-content h1 {
   font-size: clamp(2.5rem, 5vw, 4.5rem) !important;
   font-weight: 800 !important;
   background: linear-gradient(
@@ -137,7 +137,7 @@
   );
   background-clip: text;
   -webkit-background-clip: text;
-  color: transparent;
+  color: transparent; /* standard alternative */
   letter-spacing: -0.03em;
   margin-bottom: 1.5rem !important;
   line-height: 1.1;
@@ -519,8 +519,8 @@
     padding: 4.5rem 1rem !important;
   }
 
-  .home-hero-content h2 {
-    font-size: clamp(2.2rem, 10vw, 3rem) !important;
+  .home-hero-content h1 {
+    font-size: 2.4rem !important;
   }
 
   .search-container {

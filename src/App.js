@@ -1,6 +1,12 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useEffect, useRef } from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { useTheme } from "./context/ThemeContext";
 import RouteSeoManager from "./components/seo/RouteSeoManager";
@@ -167,6 +173,293 @@ const SignupPage = lazy(() => import("./pages/Auth/SignupPage"));
 const ProfilePage = lazy(() => import("./pages/Auth/ProfilePage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
+// ScrollToTop and route synchronization
+const AppContent = () => {
+  const location = useLocation();
+  const typesetTimerRef = useRef(null);
+
+  useEffect(() => {
+    const root = document.getElementById("root");
+    const typeset = () => {
+      if (!window.MathJax?.typesetPromise) return;
+      window.MathJax.typesetPromise([root || document.body]).catch(() => {});
+    };
+
+    const scheduleTypeset = () => {
+      window.clearTimeout(typesetTimerRef.current);
+      typesetTimerRef.current = window.setTimeout(typeset, 80);
+    };
+
+    scheduleTypeset();
+
+    const observer = root
+      ? new MutationObserver(scheduleTypeset)
+      : null;
+    observer?.observe(root, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+
+    const stopObserver = window.setTimeout(() => observer?.disconnect(), 1800);
+
+    return () => {
+      observer?.disconnect();
+      window.clearTimeout(stopObserver);
+      window.clearTimeout(typesetTimerRef.current);
+    };
+  }, [location]);
+
+  return (
+    <>
+      <ScrollToTop />
+      <RouteNormalizer />
+      <RouteSeoManager />
+      <AnalyticsTracker />
+      <Suspense
+        fallback={<div className="app-route-loading">Loading workspace...</div>}
+      >
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/problems" element={<ProblemsPage />} />
+          <Route path="/problems/:topicSlug" element={<ProblemsPage />} />
+          <Route path="/boolforge" element={<Boolforge />} />
+
+          {/* ── Boolean Algebra (/boolean/* matches baConfig.js) ── */}
+          <Route
+            path="/boolean/overview"
+            element={<BooleanAlgebraOverview />}
+          />
+          <Route path="/boolean/identities" element={<BooleanIdentities />} />
+          <Route path="/boolean/laws" element={<BooleanLaws />} />
+          <Route path="/boolean/complement" element={<ComplementPage />} />
+          <Route path="/boolean/duality" element={<DualityPrinciple />} />
+          <Route path="/boolean/consensus" element={<ConsensusTheorem />} />
+          <Route path="/boolean/minterms" element={<MintermsPage />} />
+          <Route path="/boolean/maxterms" element={<MaxtermsPage />} />
+          <Route
+            path="/boolean/minterms-maxterms"
+            element={<MintermsMaxtermsRelation />}
+          />
+          <Route
+            path="/boolean/significant-digits"
+            element={<SignificantDigits />}
+          />
+
+          {/* ── Standard Forms (no boolean/ prefix, standalone) ── */}
+          <Route path="/standard-forms" element={<StandardForms />} />
+
+          {/* ── Advanced Logic ────────────────────────────────── */}
+          <Route path="/circuit-cost" element={<CircuitCost />} />
+          <Route path="/universal-gates" element={<UniversalGates />} />
+          <Route path="/odd-function" element={<OddFunction />} />
+          <Route path="/gates" element={<GateExplanation />} />
+          <Route path="/timing-diagrams" element={<TimeDiagrams />} />
+
+          {/* ── Number Systems (/number-systems/* matches nsConfig.js) ── */}
+          <Route
+            path="/number-systems/binary-representation"
+            element={<BinaryRepresentation />}
+          />
+          <Route
+            path="/number-systems/number-conversion"
+            element={<NumberConverter />}
+          />
+          <Route
+            path="/number-systems/bit-extension"
+            element={<BitExtension />}
+          />
+          <Route
+            path="/number-systems/bcd-notation"
+            element={<BCDNotation />}
+          />
+          <Route
+            path="/number-systems/ascii-notation"
+            element={<ASCIINotation />}
+          />
+          <Route
+            path="/number-systems/bit-converter"
+            element={<BitConverter />}
+          />
+          <Route
+            path="/number-systems/calculator"
+            element={<NumberSystemCalculator />}
+          />
+
+          {/* ── Number Systems legacy redirects (old routes → new) ── */}
+          <Route
+            path="/binaryrepresentation"
+            element={
+              <Navigate to="/number-systems/binary-representation" replace />
+            }
+          />
+          <Route
+            path="/numberconversation"
+            element={
+              <Navigate to="/number-systems/number-conversion" replace />
+            }
+          />
+          <Route
+            path="/bit-extension"
+            element={<Navigate to="/number-systems/bit-extension" replace />}
+          />
+          <Route
+            path="/bcd-notation"
+            element={<Navigate to="/number-systems/bcd-notation" replace />}
+          />
+          <Route
+            path="/ascii-notation"
+            element={<Navigate to="/number-systems/ascii-notation" replace />}
+          />
+          <Route
+            path="/bitconvertor"
+            element={<Navigate to="/number-systems/bit-converter" replace />}
+          />
+          <Route
+            path="/numbersystemcalculator"
+            element={<Navigate to="/number-systems/calculator" replace />}
+          />
+
+          {/* ── Parity Bit Calculator (standalone) ── */}
+          <Route
+            path="/paritybitcalculator"
+            element={<ParityBitCalculator />}
+          />
+
+          {/* ── K-Map ─────────────────────────────────────────── */}
+          <Route path="/kmapgenerator" element={<KMapGenerator />} />
+
+          {/* ── Book Problems ─────────────────────────────────── */}
+          <Route path="/book" element={<ProblemSolver />} />
+          <Route path="/book/ch2" element={<Ch2ProblemSolver />} />
+
+          {/* ── Arithmetic Functions & HDLs ───────────────────── */}
+          <Route path="/arithmetic/binary-adders" element={<BinaryAdders />} />
+          <Route
+            path="/arithmetic/binary-subtractor"
+            element={<BinarySubtractor />}
+          />
+          <Route
+            path="/arithmetic/binary-add-subtractor"
+            element={<BinaryAddSubtractor />}
+          />
+          <Route
+            path="/arithmetic/binary-multipliers"
+            element={<BinaryMultipliers />}
+          />
+          <Route
+            path="/arithmetic/code-conversion"
+            element={<CodeConversion />}
+          />
+          <Route
+            path="/arithmetic/magnitude-comparator"
+            element={<MagnitudeComparator />}
+          />
+          <Route
+            path="/arithmetic/parity-generators"
+            element={<ParityGenerators />}
+          />
+          <Route
+            path="/arithmetic/design-applications"
+            element={<DesignApplications />}
+          />
+          <Route path="/arithmetic/complements" element={<Complements />} />
+          <Route
+            path="/arithmetic/signed-unsigned"
+            element={<SignedUnsignedArithmetic />}
+          />
+
+          {/* ── Combinational Circuits ────────────────────────── */}
+          <Route path="/encoder" element={<EncoderPage />} />
+          <Route path="/decoder" element={<DecoderPage />} />
+          <Route path="/mux" element={<MuxPage />} />
+          <Route path="/demux" element={<DemuxPage />} />
+
+          {/* ── Sequential Circuits ───────────────────────────── */}
+          <Route path="/sequential/intro" element={<SeqIntro />} />
+          <Route path="/sequential/latches" element={<SeqLatches />} />
+          <Route path="/sequential/flip-flops" element={<SeqFlipFlops />} />
+          <Route
+            path="/sequential/flip-flop-types"
+            element={<SeqFlipFlopTypes />}
+          />
+          <Route path="/sequential/analysis" element={<SeqAnalysis />} />
+          <Route
+            path="/sequential/design-procedures"
+            element={<SeqDesignProcedures />}
+          />
+          <Route
+            path="/sequential/state-diagram"
+            element={<SeqStateDiagram />}
+          />
+          <Route
+            path="/sequential/state-reduction"
+            element={<SeqStateReduction />}
+          />
+
+          {/* ── Registers & Transfers ─────────────────────────── */}
+          <Route path="/registers/intro" element={<RegIntro />} />
+          <Route path="/registers/counters" element={<RegCounters />} />
+          <Route path="/registers/sync-async" element={<RegSyncAsync />} />
+          <Route
+            path="/registers/shift-registers"
+            element={<RegShiftRegisters />}
+          />
+          <Route path="/registers/serial-shift" element={<RegSerialShift />} />
+          <Route path="/registers/loading" element={<RegLoading />} />
+          <Route path="/registers/parallel" element={<RegParallel />} />
+          <Route
+            path="/registers/ripple-counters"
+            element={<RegRippleCounters />}
+          />
+          <Route
+            path="/registers/sync-binary-counters"
+            element={<RegSyncBinaryCounters />}
+          />
+
+          {/* ── Memory Systems ────────────────────────────────── */}
+          <Route path="/memory/basics" element={<MemoryBasics />} />
+          <Route
+            path="/memory/read-only-memories"
+            element={<ReadOnlyMemories />}
+          />
+          <Route
+            path="/memory/programmable-logic-array"
+            element={<ProgrammableLogicArray />}
+          />
+          <Route
+            path="/memory/random-access-memory"
+            element={<RandomAccessMemory />}
+          />
+          <Route
+            path="/memory/static-dynamic-ram"
+            element={<StaticDynamicRAM />}
+          />
+          <Route path="/memory/array-of-ram-ics" element={<ArrayOfRAMICs />} />
+          <Route
+            path="/memory/memory-construction-ram"
+            element={<MemoryConstructionRAM />}
+          />
+
+          {/* ── Misc ──────────────────────────────────────────── */}
+          <Route path="/trainer-board" element={<DLDTrainerBoard />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </Suspense>
+    </>
+  );
+};
+
 function App() {
   const { theme } = useTheme();
 
@@ -175,212 +468,7 @@ function App() {
       <BrowserRouter
         future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
       >
-        <ScrollToTop />
-        <RouteNormalizer />
-        <RouteSeoManager />
-        <AnalyticsTracker />
-        <Suspense
-          fallback={
-            <div className="app-route-loading">Loading workspace...</div>
-          }
-        >
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route
-              path="/profile"
-              element={
-                <ProtectedRoute>
-                  <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/problems" element={<ProblemsPage />} />
-            <Route path="/problems/:topicSlug" element={<ProblemsPage />} />
-            <Route path="/boolforge" element={<Boolforge />} />
-
-            {/* ── Boolean Algebra (/boolean/* matches baConfig.js) ── */}
-            <Route
-              path="/boolean/overview"
-              element={<BooleanAlgebraOverview />}
-            />
-            <Route path="/boolean/identities" element={<BooleanIdentities />} />
-            <Route path="/boolean/laws" element={<BooleanLaws />} />
-            <Route path="/boolean/complement" element={<ComplementPage />} />
-            <Route path="/boolean/duality" element={<DualityPrinciple />} />
-            <Route path="/boolean/consensus" element={<ConsensusTheorem />} />
-            <Route path="/boolean/minterms" element={<MintermsPage />} />
-            <Route path="/boolean/maxterms" element={<MaxtermsPage />} />
-            <Route
-              path="/boolean/minterms-maxterms"
-              element={<MintermsMaxtermsRelation />}
-            />
-            <Route
-              path="/boolean/significant-digits"
-              element={<SignificantDigits />}
-            />
-
-            {/* ── Standard Forms (no boolean/ prefix, standalone) ── */}
-            <Route path="/standard-forms" element={<StandardForms />} />
-
-            {/* ── Advanced Logic ────────────────────────────────── */}
-            <Route path="/circuit-cost" element={<CircuitCost />} />
-            <Route path="/universal-gates" element={<UniversalGates />} />
-            <Route path="/odd-function" element={<OddFunction />} />
-            <Route path="/gates" element={<GateExplanation />} />
-            <Route path="/timing-diagrams" element={<TimeDiagrams />} />
-
-            {/* ── Number Systems (/number-systems/* matches nsConfig.js) ── */}
-            <Route path="/number-systems/binary-representation" element={<BinaryRepresentation />} />
-            <Route path="/number-systems/number-conversion" element={<NumberConverter />} />
-            <Route path="/number-systems/bit-extension" element={<BitExtension />} />
-            <Route path="/number-systems/bcd-notation" element={<BCDNotation />} />
-            <Route path="/number-systems/ascii-notation" element={<ASCIINotation />} />
-            <Route path="/number-systems/bit-converter" element={<BitConverter />} />
-            <Route path="/number-systems/calculator" element={<NumberSystemCalculator />} />
-
-            {/* ── Number Systems legacy redirects (old routes → new) ── */}
-            <Route path="/binaryrepresentation" element={<Navigate to="/number-systems/binary-representation" replace />} />
-            <Route path="/numberconversation" element={<Navigate to="/number-systems/number-conversion" replace />} />
-            <Route path="/bit-extension" element={<Navigate to="/number-systems/bit-extension" replace />} />
-            <Route path="/bcd-notation" element={<Navigate to="/number-systems/bcd-notation" replace />} />
-            <Route path="/ascii-notation" element={<Navigate to="/number-systems/ascii-notation" replace />} />
-            <Route path="/bitconvertor" element={<Navigate to="/number-systems/bit-converter" replace />} />
-            <Route path="/numbersystemcalculator" element={<Navigate to="/number-systems/calculator" replace />} />
-
-            {/* ── Parity Bit Calculator (standalone) ── */}
-            <Route path="/paritybitcalculator" element={<ParityBitCalculator />} />
-
-            {/* ── K-Map ─────────────────────────────────────────── */}
-            <Route path="/kmapgenerator" element={<KMapGenerator />} />
-
-            {/* ── Book Problems ─────────────────────────────────── */}
-            <Route path="/book" element={<ProblemSolver />} />
-            <Route path="/book/ch2" element={<Ch2ProblemSolver />} />
-
-            {/* ── Arithmetic Functions & HDLs ───────────────────── */}
-            <Route
-              path="/arithmetic/binary-adders"
-              element={<BinaryAdders />}
-            />
-            <Route
-              path="/arithmetic/binary-subtractor"
-              element={<BinarySubtractor />}
-            />
-            <Route
-              path="/arithmetic/binary-add-subtractor"
-              element={<BinaryAddSubtractor />}
-            />
-            <Route
-              path="/arithmetic/binary-multipliers"
-              element={<BinaryMultipliers />}
-            />
-            <Route
-              path="/arithmetic/code-conversion"
-              element={<CodeConversion />}
-            />
-            <Route
-              path="/arithmetic/magnitude-comparator"
-              element={<MagnitudeComparator />}
-            />
-            <Route
-              path="/arithmetic/parity-generators"
-              element={<ParityGenerators />}
-            />
-            <Route
-              path="/arithmetic/design-applications"
-              element={<DesignApplications />}
-            />
-            <Route path="/arithmetic/complements" element={<Complements />} />
-            <Route
-              path="/arithmetic/signed-unsigned"
-              element={<SignedUnsignedArithmetic />}
-            />
-
-            {/* ── Combinational Circuits ────────────────────────── */}
-            <Route path="/encoder" element={<EncoderPage />} />
-            <Route path="/decoder" element={<DecoderPage />} />
-            <Route path="/mux" element={<MuxPage />} />
-            <Route path="/demux" element={<DemuxPage />} />
-
-            {/* ── Sequential Circuits ───────────────────────────── */}
-            <Route path="/sequential/intro" element={<SeqIntro />} />
-            <Route path="/sequential/latches" element={<SeqLatches />} />
-            <Route path="/sequential/flip-flops" element={<SeqFlipFlops />} />
-            <Route
-              path="/sequential/flip-flop-types"
-              element={<SeqFlipFlopTypes />}
-            />
-            <Route path="/sequential/analysis" element={<SeqAnalysis />} />
-            <Route
-              path="/sequential/design-procedures"
-              element={<SeqDesignProcedures />}
-            />
-            <Route
-              path="/sequential/state-diagram"
-              element={<SeqStateDiagram />}
-            />
-            <Route
-              path="/sequential/state-reduction"
-              element={<SeqStateReduction />}
-            />
-
-            {/* ── Registers & Transfers ─────────────────────────── */}
-            <Route path="/registers/intro" element={<RegIntro />} />
-            <Route path="/registers/counters" element={<RegCounters />} />
-            <Route path="/registers/sync-async" element={<RegSyncAsync />} />
-            <Route
-              path="/registers/shift-registers"
-              element={<RegShiftRegisters />}
-            />
-            <Route
-              path="/registers/serial-shift"
-              element={<RegSerialShift />}
-            />
-            <Route path="/registers/loading" element={<RegLoading />} />
-            <Route path="/registers/parallel" element={<RegParallel />} />
-            <Route
-              path="/registers/ripple-counters"
-              element={<RegRippleCounters />}
-            />
-            <Route
-              path="/registers/sync-binary-counters"
-              element={<RegSyncBinaryCounters />}
-            />
-
-            {/* ── Memory Systems ────────────────────────────────── */}
-            <Route path="/memory/basics" element={<MemoryBasics />} />
-            <Route
-              path="/memory/read-only-memories"
-              element={<ReadOnlyMemories />}
-            />
-            <Route
-              path="/memory/programmable-logic-array"
-              element={<ProgrammableLogicArray />}
-            />
-            <Route
-              path="/memory/random-access-memory"
-              element={<RandomAccessMemory />}
-            />
-            <Route
-              path="/memory/static-dynamic-ram"
-              element={<StaticDynamicRAM />}
-            />
-            <Route
-              path="/memory/array-of-ram-ics"
-              element={<ArrayOfRAMICs />}
-            />
-            <Route
-              path="/memory/memory-construction-ram"
-              element={<MemoryConstructionRAM />}
-            />
-
-            {/* ── Misc ──────────────────────────────────────────── */}
-            <Route path="/trainer-board" element={<DLDTrainerBoard />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
-        </Suspense>
+        <AppContent />
       </BrowserRouter>
       <Analytics />
     </div>

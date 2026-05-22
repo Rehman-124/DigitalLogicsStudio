@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import NSLayout from './components/NSLayout';
 
+const Power = ({ base = "2", exponent }) => (
+    <span className="math-inline">
+        {base}
+        <sup>{exponent}</sup>
+    </span>
+);
+
 export default function BinaryRepresentation() {
     const [smInput, setSmInput] = useState('');
     const [smPadding, setSmPadding] = useState(0);
@@ -101,15 +108,19 @@ export default function BinaryRepresentation() {
     const generateChartData = (type) => {
         const data = [];
         for (let i = 10; i >= -10; i--) {
-            let binary = '';
             if (type === 'SM') {
                 const abs = Math.abs(i);
                 const bin = abs.toString(2).padStart(4, '0');
-                binary = i === 0 ? `0${bin}` : (i < 0 ? '1' : '0') + bin;
+                if (i === 0) {
+                    data.push({ id: 'sm-positive-zero', dec: '+0', bin: `0${bin}` });
+                    data.push({ id: 'sm-negative-zero', dec: '-0', bin: `1${bin}` });
+                    continue;
+                }
+                data.push({ id: `sm-${i}`, dec: i, bin: (i < 0 ? '1' : '0') + bin });
             } else {
-                binary = i >= 0 ? i.toString(2).padStart(5, '0') : (32 + i).toString(2);
+                const binary = i >= 0 ? i.toString(2).padStart(5, '0') : (32 + i).toString(2);
+                data.push({ id: `tc-${i}`, dec: i, bin: binary });
             }
-            data.push({ dec: i, bin: binary });
         }
         return data;
     };
@@ -120,6 +131,31 @@ export default function BinaryRepresentation() {
             subtitle="Signed Magnitude, Two's Complement, and Unsigned"
             intro="Learn how computers encode positive and negative integers in binary. Explore the three most common representations side-by-side."
         >
+            <section className="binary-card binary-overview-card">
+                <h2 className="binary-section-title binary-title-primary">
+                    <span className="binary-dot binary-dot-primary"></span>
+                    Quick idea
+                </h2>
+                <p className="binary-text">
+                    A bit pattern is just a row of 0s and 1s. The same row can mean different numbers depending on the rule used to read it.
+                    These three rules answer one question: does the leftmost bit belong to the value, or does it describe the sign?
+                </p>
+                <div className="binary-concept-grid">
+                    <div className="binary-concept-card">
+                        <span className="binary-concept-label">Unsigned</span>
+                        <p>All bits are value bits, so the number is never negative.</p>
+                    </div>
+                    <div className="binary-concept-card">
+                        <span className="binary-concept-label">Signed magnitude</span>
+                        <p>The first bit stores the sign. The remaining bits store the size.</p>
+                    </div>
+                    <div className="binary-concept-card">
+                        <span className="binary-concept-label">Two's complement</span>
+                        <p>The first bit has negative weight, which makes addition and subtraction work naturally.</p>
+                    </div>
+                </div>
+            </section>
+
             <div className="binary-wrapper">
                 <section className="binary-card">
                     <h2 className="binary-section-title binary-title-primary">
@@ -131,6 +167,10 @@ export default function BinaryRepresentation() {
                         <h3 className="binary-info-heading">How it works:</h3>
                         <p className="binary-text">
                             <span className="binary-highlight-primary">Leftmost bit</span> is sign (0=+, 1=-). Remaining bits are magnitude.
+                        </p>
+                        <p className="binary-text">
+                            Think of it like writing a normal decimal number with a plus or minus sign in front. The sign bit tells the direction,
+                            and the magnitude bits tell how far from zero the value is.
                         </p>
 
                         <button className="binary-toggle-btn" onClick={() => setShowSmChart(!showSmChart)}>
@@ -148,7 +188,7 @@ export default function BinaryRepresentation() {
                                     </thead>
                                     <tbody>
                                         {generateChartData('SM').map((row) => (
-                                            <tr key={row.dec} className="binary-table-row">
+                                            <tr key={row.id} className="binary-table-row">
                                                 <td className="binary-table-cell">{row.dec}</td>
                                                 <td className="binary-table-cell binary-table-cell-right binary-table-cell-mono binary-table-cell-primary">
                                                     <span className="binary-table-cell-danger">{row.bin[0]}</span>
@@ -163,15 +203,34 @@ export default function BinaryRepresentation() {
 
                         <div className="binary-reference-section">
                             <h4 className="binary-reference-title">
-                                Example: <span className="binary-highlight-primary">-5</span>
+                                How to calculate signed magnitude
                             </h4>
                             <div className="binary-example-box">
                                 <ol className="binary-list">
-                                    <li><strong>Magnitude:</strong> |−5| = 5</li>
-                                    <li><strong>Binary:</strong> 0101</li>
-                                    <li><strong>Add Sign:</strong> <span className="binary-highlight-primary">1</span>0101 (1 for negative)</li>
+                                    <li>Choose the total number of bits. One bit is reserved for the sign.</li>
+                                    <li>Use <strong>0</strong> for a positive number and <strong>1</strong> for a negative number.</li>
+                                    <li>Convert the absolute value to binary using the remaining bits.</li>
+                                    <li>Place the sign bit at the left.</li>
                                 </ol>
                             </div>
+                        </div>
+
+                        <div className="binary-reference-section">
+                            <h4 className="binary-reference-title">
+                                Example: <span className="binary-highlight-primary">-5 in 5 bits</span>
+                            </h4>
+                            <div className="binary-example-box">
+                                <ol className="binary-list">
+                                    <li><strong>Sign:</strong> negative, so the first bit is <span className="binary-highlight-primary">1</span>.</li>
+                                    <li><strong>Magnitude:</strong> |-5| = 5.</li>
+                                    <li><strong>Magnitude in 4 bits:</strong> 5 = 0101.</li>
+                                    <li><strong>Final:</strong> <span className="binary-highlight-primary">1</span>0101.</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div className="binary-callout">
+                            Signed magnitude has two zeros: +0 is 00000 and -0 is 10000. That is why real processors usually prefer two's complement.
                         </div>
                     </div>
 
@@ -213,6 +272,17 @@ export default function BinaryRepresentation() {
                     {/* SM Range */}
                     <div className="binary-info-box binary-info-secondary">
                         <h3 className="binary-info-heading">Range Calculator</h3>
+                        <p className="binary-text">
+                            For <strong>n bits</strong>, signed magnitude uses 1 sign bit and <strong>n - 1 magnitude bits</strong>.
+                        </p>
+                        <div className="binary-example-box">
+                            <p className="binary-formula">
+                                Range: -( <Power exponent="n - 1" /> - 1 ) to +( <Power exponent="n - 1" /> - 1 )
+                            </p>
+                            <p className="binary-formula-note">
+                                Distinct bit patterns: <Power exponent="n" />, but +0 and -0 both represent zero.
+                            </p>
+                        </div>
                         <div className="binary-input-group">
                             <label className="binary-label">Bit width:</label>
                             <input
@@ -245,6 +315,10 @@ export default function BinaryRepresentation() {
                         <p className="binary-text">
                             Invert all bits, then add 1. <span className="binary-highlight-secondary">One unique zero</span>, wider range.
                         </p>
+                        <p className="binary-text">
+                            Two's complement is the standard way computers store signed integers. For positive values, write normal binary.
+                            {" "}For negative values, use the fixed bit width and wrap around from <Power exponent="n" />.
+                        </p>
 
                         <button className="binary-toggle-btn" onClick={() => setShowTcChart(!showTcChart)}>
                             {showTcChart ? "Hide Reference Chart (-10 to 10)" : "Show Reference Chart (-10 to 10)"}
@@ -261,7 +335,7 @@ export default function BinaryRepresentation() {
                                     </thead>
                                     <tbody>
                                         {generateChartData('TC').map((row) => (
-                                            <tr key={row.dec} className="binary-table-row">
+                                            <tr key={row.id} className="binary-table-row">
                                                 <td className="binary-table-cell">{row.dec}</td>
                                                 <td className="binary-table-cell binary-table-cell-right binary-table-cell-mono binary-table-cell-secondary">
                                                     <span className="binary-table-cell-danger">{row.bin[0]}</span>
@@ -273,6 +347,39 @@ export default function BinaryRepresentation() {
                                 </table>
                             </div>
                         )}
+
+                        <div className="binary-reference-section">
+                            <h4 className="binary-reference-title">
+                                How to calculate a negative value
+                            </h4>
+                            <div className="binary-example-box">
+                                <ol className="binary-list">
+                                    <li>Choose the bit width first. The width matters.</li>
+                                    <li>Write the positive magnitude in that many bits.</li>
+                                    <li>Flip every bit: 0 becomes 1, and 1 becomes 0.</li>
+                                    <li>Add 1 to the flipped result.</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div className="binary-reference-section">
+                            <h4 className="binary-reference-title">
+                                Example: <span className="binary-highlight-secondary">-13 in 8 bits</span>
+                            </h4>
+                            <div className="binary-example-box">
+                                <ol className="binary-list">
+                                    <li><strong>+13:</strong> 00001101.</li>
+                                    <li><strong>Invert:</strong> 11110010.</li>
+                                    <li><strong>Add 1:</strong> 11110010 + 1 = 11110011.</li>
+                                    <li><strong>Final:</strong> 11110011 represents -13.</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div className="binary-callout">
+                            Shortcut: in n bits, a negative number can also be found with <Power exponent="n" /> - value.
+                            For -13 in 8 bits: 256 - 13 = 243, and 243 is 11110011.
+                        </div>
                     </div>
 
                     {/* TC Calculator */}
@@ -312,6 +419,17 @@ export default function BinaryRepresentation() {
                     {/* TC Range */}
                     <div className="binary-info-box binary-info-primary">
                         <h3 className="binary-info-heading">Range Calculator</h3>
+                        <p className="binary-text">
+                            For <strong>n bits</strong>, two's complement gives one extra negative value because there is only one zero.
+                        </p>
+                        <div className="binary-example-box">
+                            <p className="binary-formula">
+                                Range: -<Power exponent="n - 1" /> to +( <Power exponent="n - 1" /> - 1 )
+                            </p>
+                            <p className="binary-formula-note">
+                                Distinct values: <Power exponent="n" />.
+                            </p>
+                        </div>
                         <div className="binary-input-group">
                             <label className="binary-label">Bit width:</label>
                             <input
@@ -339,7 +457,55 @@ export default function BinaryRepresentation() {
                         Unsigned Integers
                     </h2>
                     <div className="binary-info-box binary-info-amber">
+                        <h3 className="binary-info-heading">How it works:</h3>
+                        <p className="binary-text">
+                            Unsigned representation is the simplest form: every bit contributes a positive power of 2.
+                            There is no sign bit, so the smallest value is always 0.
+                        </p>
+
+                        <div className="binary-reference-section">
+                            <h4 className="binary-reference-title">How to calculate unsigned binary</h4>
+                            <div className="binary-example-box">
+                                <ol className="binary-list">
+                                    <li>Label the bit positions from right to left: 1, 2, 4, 8, 16, and so on.</li>
+                                    <li>Keep the place values where the bit is 1.</li>
+                                    <li>Add those place values together.</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div className="binary-reference-section">
+                            <h4 className="binary-reference-title">
+                                Example: <span className="binary-highlight-amber">101101</span>
+                            </h4>
+                            <div className="binary-example-box">
+                                <ol className="binary-list">
+                                    <li><strong>Place values:</strong> 32, 16, 8, 4, 2, 1.</li>
+                                    <li><strong>Active bits:</strong> 32 + 8 + 4 + 1.</li>
+                                    <li><strong>Final:</strong> 101101 = 45.</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div className="binary-callout">
+                            With n bits, unsigned range is 0 to <Power exponent="n" /> - 1.
+                            With 8 bits, that is 0 to 255.
+                        </div>
+                    </div>
+
+                    <div className="binary-info-box binary-info-amber">
                         <h3 className="binary-info-heading">Range Calculator</h3>
+                        <p className="binary-text">
+                            For <strong>n bits</strong>, every bit is a value bit, so all combinations count upward from zero.
+                        </p>
+                        <div className="binary-example-box">
+                            <p className="binary-formula">
+                                Range: 0 to <Power exponent="n" /> - 1
+                            </p>
+                            <p className="binary-formula-note">
+                                Distinct values: <Power exponent="n" />.
+                            </p>
+                        </div>
                         <div className="binary-input-group">
                             <label className="binary-label">Bit width:</label>
                             <input
