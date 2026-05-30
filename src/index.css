@@ -48,40 +48,40 @@ html[data-theme='dark'],
   --text-color: #0f172a;
   --card-bg: #ffffff;
   --card-bg-solid: #ffffff;
-  --card-border: #065f46;
-  --card-border-accent: #065f46;
-  --card-border-width: 2px;
-  --border-color: rgba(6, 95, 70, 0.32);
+  --card-border: #e2e8f0;
+  --card-border-accent: rgba(59, 130, 246, 0.25);
+  --card-border-width: 1px;
+  --border-color: rgba(148, 163, 184, 0.15);
   --secondary-text: #475569;
-  --accent-color: #047857;
-  --nav-bg: rgba(255, 255, 255, 0.92);
+  --accent-color: #2563eb;
+  --nav-bg: rgba(255, 255, 255, 0.88);
   --brand-gradient: linear-gradient(to right, #0f172a, #334155);
   --logo-node-color: #2563eb;
-  --logo-glow: rgba(37, 99, 235, 0.2);
-  --heading-color: #1e293b;
-  --subtext-color: #2563eb;
-  --bg-gradient-end: #e2e8f0;
+  --logo-glow: rgba(37, 99, 235, 0.15);
+  --heading-color: #0f172a;
+  --subtext-color: #3b82f6;
+  --bg-gradient-end: #f1f5f9;
   --input-bg: #ffffff;
-  --input-border: rgba(15, 23, 42, 0.2);
+  --input-border: rgba(148, 163, 184, 0.3);
   --surface-elevated: #ffffff;
-  --surface-muted: #f1f5f9;
-  --surface-inset: #e2e8f0;
+  --surface-muted: #f8fafc;
+  --surface-inset: #f1f5f9;
   --surface-gradient: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-  --chip-bg: rgba(15, 23, 42, 0.04);
-  --chip-bg-strong: #f1f5f9;
+  --chip-bg: rgba(37, 99, 235, 0.04);
+  --chip-bg-strong: rgba(37, 99, 235, 0.08);
   --card-shadow:
-    0 10px 28px rgba(6, 95, 70, 0.1),
-    0 0 0 1px rgba(6, 95, 70, 0.06);
+    0 10px 30px rgba(15, 23, 42, 0.04),
+    0 1px 3px rgba(15, 23, 42, 0.02);
   --card-shadow-hover:
-    0 16px 36px rgba(6, 95, 70, 0.14),
-    0 0 0 1px rgba(6, 95, 70, 0.12);
+    0 20px 40px rgba(15, 23, 42, 0.08),
+    0 1px 3px rgba(15, 23, 42, 0.02);
   --eyebrow-muted: #64748b;
-  --badge-text: #065f46;
-  --badge-bg: rgba(4, 120, 87, 0.1);
-  --badge-border: #065f46;
+  --badge-text: #2563eb;
+  --badge-bg: rgba(37, 99, 235, 0.08);
+  --badge-border: rgba(37, 99, 235, 0.2);
 }
 
-/* Prominent card outlines in light mode */
+/* Prominent card outlines in light mode - refined to thin borders */
 [data-theme='light'] .home-card,
 [data-theme='light'] .core-topic-card,
 [data-theme='light'] .info-card,
@@ -96,7 +96,7 @@ html[data-theme='dark'],
 [data-theme='light'] details,
 [data-theme='light'] .not-found-card,
 [data-theme='light'] .home-problems-cta {
-  border-width: var(--card-border-width, 2px);
+  border-width: var(--card-border-width, 1px);
   border-style: solid;
   border-color: var(--card-border);
 }
@@ -104,7 +104,7 @@ html[data-theme='dark'],
 [data-theme='light'] .home-card-link,
 [data-theme='light'] .core-topic-pill,
 [data-theme='light'] .core-topic-card-metrics div {
-  border-color: rgba(6, 95, 70, 0.45);
+  border-color: rgba(148, 163, 184, 0.3);
 }
 
 [data-theme='light'] .home-card-link:hover,

@@ -31,8 +31,8 @@
   --problems-surface: rgba(255, 255, 255, 0.88);
   --problems-surface-soft: rgba(248, 250, 252, 0.94);
   --problems-surface-strong: rgba(241, 245, 249, 0.96);
-  --problems-border: #065f46;
-  --problems-border-strong: #047857;
+  --problems-border: rgba(37, 99, 235, 0.15);
+  --problems-border-strong: rgba(37, 99, 235, 0.25);
   --problems-row-hover: rgba(226, 232, 240, 0.78);
   --problems-text-strong: #0f172a;
   --problems-text-soft: #334155;
@@ -57,9 +57,9 @@
 .problems-page.theme-light .problems-widget,
 .problems-page.theme-light .problems-table-card,
 .problems-page.theme-light .problems-banner-card {
-  border-width: 2px;
+  border-width: 1px;
   border-color: var(--problems-border);
-  box-shadow: 0 12px 28px rgba(6, 95, 70, 0.1);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
 }
 
 .problems-page.theme-light .problems-sidebar-badge,
@@ -85,7 +85,7 @@
 
 .problems-page.theme-light .problems-table tbody tr:hover,
 .problems-page.theme-light .problems-table tbody tr.is-selected {
-  background: #f0fdf4;
+  background: #f8fafc;
 }
 
 .problems-page.theme-light .problem-title-text {
@@ -179,8 +179,8 @@
 
 .problems-page.theme-light .problems-sidebar-link:hover,
 .problems-page.theme-light .problems-sidebar-link.is-active {
-  background: #f0fdf4;
-  border-color: rgba(6, 95, 70, 0.2);
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.25);
 }
 
 .problems-page.theme-light .problems-sidebar-link-badge {
@@ -219,19 +219,21 @@
 }
 
 .problems-page.theme-light .intensity-1 {
-  background: rgba(22, 163, 74, 0.18);
+  background: rgba(37, 99, 235, 0.18);
 }
 
 .problems-page.theme-light .intensity-2 {
-  background: rgba(22, 163, 74, 0.32);
+  background: rgba(37, 99, 235, 0.35);
 }
 
 .problems-page.theme-light .intensity-3 {
-  background: rgba(22, 163, 74, 0.52);
+  background: rgba(37, 99, 235, 0.58);
+  color: #ffffff;
 }
 
 .problems-page.theme-light .intensity-4 {
-  background: rgba(22, 163, 74, 0.76);
+  background: #2563eb;
+  color: #ffffff;
 }
 
 .problems-page.theme-light .calendar-nav button {

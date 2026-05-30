@@ -66,6 +66,6 @@
 }
 
 [data-theme="light"] .not-found-link--primary {
-  background: rgba(4, 120, 87, 0.1);
-  border-color: rgba(6, 95, 70, 0.35);
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.25);
 }

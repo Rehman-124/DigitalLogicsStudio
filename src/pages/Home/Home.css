@@ -413,24 +413,24 @@
 }
 
 [data-theme="light"] .home-featured-box {
-  border-color: rgba(6, 95, 70, 0.2);
+  border-color: rgba(37, 99, 235, 0.15);
   background: linear-gradient(
     145deg,
-    rgba(6, 95, 70, 0.05) 0%,
-    rgba(4, 120, 87, 0.03) 50%,
-    rgba(248, 250, 252, 0.9) 100%
+    rgba(37, 99, 235, 0.04) 0%,
+    rgba(139, 92, 246, 0.02) 50%,
+    rgba(255, 255, 255, 0.95) 100%
   );
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.8) inset,
-    0 12px 32px rgba(6, 95, 70, 0.1);
+    0 12px 32px rgba(15, 23, 42, 0.04);
 }
 
 [data-theme="light"] .home-featured-box::before {
   background: linear-gradient(
     135deg,
-    rgba(6, 95, 70, 0.08) 0%,
+    rgba(37, 99, 235, 0.06) 0%,
     transparent 50%,
-    rgba(4, 120, 87, 0.05) 100%
+    rgba(139, 92, 246, 0.04) 100%
   );
 }
 
@@ -673,53 +673,53 @@
     rgba(255, 255, 255, 0.95), 
     rgba(248, 250, 252, 0.95)
   ) !important;
-  border: 2px solid var(--card-border) !important;
+  border: 1px solid var(--card-border) !important;
   box-shadow: 
-    0 4px 16px rgba(6, 95, 70, 0.08),
+    0 4px 16px rgba(15, 23, 42, 0.03),
     inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 [data-theme="light"] .home-card::before {
   background: linear-gradient(135deg, 
-    rgba(6, 95, 70, 0.4), 
-    rgba(4, 120, 87, 0.4),
-    rgba(6, 95, 70, 0.4)
+    rgba(37, 99, 235, 0.2), 
+    rgba(139, 92, 246, 0.15),
+    rgba(37, 99, 235, 0.2)
   );
 }
 
 [data-theme="light"] .home-card::after {
   background: radial-gradient(
     circle,
-    rgba(6, 95, 70, 0.12) 0%,
+    rgba(37, 99, 235, 0.05) 0%,
     transparent 70%
   );
 }
 
 [data-theme="light"] .feature-card {
-  border: 2px solid rgba(6, 95, 70, 0.3) !important;
+  border: 1px solid rgba(37, 99, 235, 0.2) !important;
   box-shadow: 
-    0 8px 24px rgba(6, 95, 70, 0.12),
+    0 8px 24px rgba(15, 23, 42, 0.04),
     inset 0 1px 0 rgba(255, 255, 255, 1);
   background: linear-gradient(135deg, 
-    rgba(6, 95, 70, 0.04), 
-    rgba(4, 120, 87, 0.02)
+    rgba(37, 99, 235, 0.02), 
+    rgba(139, 92, 246, 0.01)
   ) !important;
 }
 
 [data-theme="light"] .feature-card::before {
   background: linear-gradient(135deg, 
-    rgba(6, 95, 70, 0.5), 
-    rgba(4, 120, 87, 0.5),
-    rgba(16, 185, 129, 0.4)
+    rgba(37, 99, 235, 0.3), 
+    rgba(139, 92, 246, 0.25),
+    rgba(37, 99, 235, 0.2)
   );
 }
 
 [data-theme="light"] .home-card:hover,
 [data-theme="light"] .feature-card:hover {
-  border-color: #047857 !important;
+  border-color: var(--accent-color) !important;
   box-shadow: 
-    0 16px 40px rgba(6, 95, 70, 0.18),
-    0 0 32px rgba(6, 95, 70, 0.15),
+    0 16px 40px rgba(15, 23, 42, 0.08),
+    0 0 32px rgba(37, 99, 235, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
@@ -731,39 +731,39 @@
 
 [data-theme="light"] .home-card-link::before {
   background: linear-gradient(135deg, 
-    rgba(6, 95, 70, 0.08), 
-    rgba(4, 120, 87, 0.08)
+    rgba(37, 99, 235, 0.04), 
+    rgba(139, 92, 246, 0.04)
   );
 }
 
 [data-theme="light"] .home-card-link:hover {
-  background: linear-gradient(135deg, #047857, #059669) !important;
+  background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
   color: white !important;
   border-color: transparent !important;
-  box-shadow: 0 8px 16px rgba(6, 95, 70, 0.25);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
 }
 
 [data-theme="light"] .primary-link {
   background: linear-gradient(135deg, 
-    rgba(6, 95, 70, 0.1), 
-    rgba(4, 120, 87, 0.08)
+    rgba(37, 99, 235, 0.06), 
+    rgba(139, 92, 246, 0.04)
   ) !important;
-  color: #047857 !important;
-  border: 2px solid rgba(6, 95, 70, 0.3) !important;
-  box-shadow: 0 4px 12px rgba(6, 95, 70, 0.08);
+  color: #2563eb !important;
+  border: 1px solid rgba(37, 99, 235, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.04);
 }
 
 [data-theme="light"] .primary-link::before {
   background: linear-gradient(135deg, 
-    rgba(6, 95, 70, 0.15), 
-    rgba(4, 120, 87, 0.15)
+    rgba(37, 99, 235, 0.08), 
+    rgba(139, 92, 246, 0.08)
   );
 }
 
 [data-theme="light"] .primary-link:hover {
-  background: linear-gradient(135deg, #047857, #059669) !important;
+  background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
   border-color: transparent !important;
-  box-shadow: 0 12px 24px rgba(6, 95, 70, 0.3);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
 }
 
 [data-theme="light"] .home-problems-cta-badge {
@@ -784,8 +784,8 @@
 
 [data-theme="light"] .grid-background {
   background-image:
-    linear-gradient(to right, rgba(6, 95, 70, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(6, 95, 70, 0.08) 1px, transparent 1px);
+    linear-gradient(to right, rgba(37, 99, 235, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(37, 99, 235, 0.05) 1px, transparent 1px);
 }
 
 @media (max-width: 640px) {
@@ -1146,15 +1146,15 @@
 /* Light theme */
 [data-theme="light"] .home-res-card {
   background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-  border-color: rgba(6, 95, 70, 0.15);
-  box-shadow: 0 4px 16px rgba(6, 95, 70, 0.07);
+  border-color: rgba(37, 99, 235, 0.12);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
 }
 
 [data-theme="light"] .home-res-card:hover {
-  border-color: rgba(6, 95, 70, 0.35);
+  border-color: var(--accent-color);
   box-shadow:
-    0 20px 40px rgba(6, 95, 70, 0.14),
-    0 0 0 1px rgba(6, 95, 70, 0.08);
+    0 20px 40px rgba(37, 99, 235, 0.08),
+    0 0 0 1px rgba(37, 99, 235, 0.05);
 }
 
 [data-theme="light"] .home-res-card-title {
