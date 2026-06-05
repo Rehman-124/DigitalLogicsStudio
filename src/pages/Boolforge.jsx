@@ -1234,7 +1234,6 @@ const Boolforge = ({
           toggleTheme={toggleTheme}
           theme={theme}
           onToggleNavbar={() => setNavbarVisible(false)}
-          navbarVisible={navbarVisible}
         />
       )}
       {!navbarVisible && (
