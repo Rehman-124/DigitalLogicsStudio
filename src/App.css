@@ -1458,3 +1458,58 @@ body {
     min-width: 44px;
   }
 }
+
+/* ── Trainer Board Responsive Layouts ── */
+.trainer-grid {
+  display: grid;
+  grid-template-columns: 160px 1fr 160px;
+  gap: 8px;
+}
+
+.breadboard-scroll-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  padding-bottom: 8px;
+}
+
+.breadboard-scroll-wrapper::-webkit-scrollbar {
+  height: 8px;
+}
+
+.breadboard-scroll-wrapper::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+.breadboard-scroll-wrapper::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, rgba(147, 197, 253, 0.62), rgba(37, 99, 235, 0.34));
+  border-radius: 4px;
+}
+
+.breadboard-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, rgba(191, 219, 254, 0.78), rgba(59, 130, 246, 0.52));
+}
+
+@media (max-width: 992px) {
+  .trainer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .trainer-page-container {
+    padding: 8px !important;
+  }
+
+  .trainer-outer-chassis {
+    padding: 12px 12px 0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6) !important;
+  }
+
+  .trainer-side-wall {
+    display: none !important;
+  }
+}
+

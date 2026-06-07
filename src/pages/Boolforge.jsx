@@ -803,6 +803,20 @@ const Boolforge = ({
         stopDrag();
         handleMouseUp();
       }}
+      onTouchMove={(e) => {
+        if (e.touches.length === 1) {
+          const touch = e.touches[0];
+          if (isPanning) {
+            handleMouseMove(touch);
+          } else {
+            onDrag(touch);
+          }
+        }
+      }}
+      onTouchEnd={() => {
+        stopDrag();
+        handleMouseUp();
+      }}
     >
       {/* ── Sidebar ── */}
       <div className="sidebar">
@@ -876,6 +890,13 @@ const Boolforge = ({
           ref={canvasRef}
           onContextMenu={handleCanvasContextMenu}
           onMouseDown={handleCanvasMouseDown}
+          onTouchStart={(e) => {
+            if (e.touches.length === 1) {
+              const touch = e.touches[0];
+              setIsPanning(true);
+              setPanStart({ x: touch.clientX - panOffset.x, y: touch.clientY - panOffset.y });
+            }
+          }}
           style={{
             pointerEvents: "auto",
             cursor: isPanning ? "grabbing" : "grab",
@@ -900,6 +921,12 @@ const Boolforge = ({
                 className={`gate ${gate.type === "OUTPUT" ? "output-gate" : ""} ${selectedGate?.id === gate.id ? "selected" : ""} ${gate.type === "OUTPUT" && evaluateGate(gate) ? "active" : ""}`}
                 style={{ left: gate.x, top: gate.y }}
                 onMouseDown={(e) => startDrag(e, gate)}
+                onTouchStart={(e) => {
+                  if (e.touches.length === 1) {
+                    e.stopPropagation();
+                    startDrag(e.touches[0], gate);
+                  }
+                }}
                 onDoubleClick={(e) => startRename(e, gate)}
                 onContextMenu={(e) => {
                   e.preventDefault();
