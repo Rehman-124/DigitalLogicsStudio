@@ -171,6 +171,7 @@ const DLDTrainerBoard = lazy(() => import("./pages/TrainerBoard"));
 const LoginPage = lazy(() => import("./pages/Auth/LoginPage"));
 const SignupPage = lazy(() => import("./pages/Auth/SignupPage"));
 const ProfilePage = lazy(() => import("./pages/Auth/ProfilePage"));
+const SettingsPage = lazy(() => import("./pages/Auth/SettingsPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 
 // ScrollToTop and route synchronization
@@ -228,6 +229,14 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
               </ProtectedRoute>
             }
           />

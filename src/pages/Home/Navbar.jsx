@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
@@ -58,11 +58,52 @@ function MoonIcon() {
 
 export function Navbar({ toggleTheme, theme, onHomeClick, onToggleNavbar, navbarVisible }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
+  const profileMenuRef = useRef(null);
+  const displayName = user?.name?.trim() || "User";
+  const displayEmail = user?.email?.trim() || "No email linked";
+
+  const userInitials = useMemo(() => {
+    const name = user?.name?.trim();
+    if (!name) return "U";
+    const parts = name.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) {
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  }, [user?.name]);
+
+  useEffect(() => {
+    if (!profileMenuOpen) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (!profileMenuRef.current?.contains(event.target)) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    const handleEsc = (event) => {
+      if (event.key === "Escape") {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("keydown", handleEsc);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleEsc);
+    };
+  }, [profileMenuOpen]);
 
   const handleHomeClick = () => {
     setMenuOpen(false);
+    setProfileMenuOpen(false);
     onHomeClick?.();
   };
 
@@ -74,6 +115,7 @@ export function Navbar({ toggleTheme, theme, onHomeClick, onToggleNavbar, navbar
       console.error("Logout failed:", error);
     } finally {
       setMenuOpen(false);
+      setProfileMenuOpen(false);
     }
   };
 
@@ -179,22 +221,75 @@ export function Navbar({ toggleTheme, theme, onHomeClick, onToggleNavbar, navbar
           {!loading && (
             <div className="home-auth-actions">
               {user ? (
-                <>
-                  <Link
-                    to="/profile"
-                    className="home-user-badge"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    {user.name}
-                  </Link>
+                <div className="home-profile-menu" ref={profileMenuRef}>
                   <button
                     type="button"
-                    className="home-auth-btn home-auth-btn--ghost"
-                    onClick={handleLogout}
+                    className={`home-profile-trigger${profileMenuOpen ? " is-open" : ""}`}
+                    onClick={() => setProfileMenuOpen((prev) => !prev)}
+                    aria-haspopup="menu"
+                    aria-expanded={profileMenuOpen}
+                    aria-label="Open profile menu"
                   >
-                    Logout
+                    <span className="home-profile-avatar">{userInitials}</span>
+                    <span className="home-profile-name">{displayName}</span>
+                    <span className="home-profile-chevron" aria-hidden="true">
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </span>
                   </button>
-                </>
+                  {profileMenuOpen && (
+                    <div className="home-profile-dropdown" role="menu" aria-label="Profile actions">
+                      <div className="home-profile-dropdown-header">
+                        <span className="home-profile-dropdown-avatar">{userInitials}</span>
+                        <div className="home-profile-dropdown-meta">
+                          <span className="home-profile-dropdown-name">{displayName}</span>
+                          <span className="home-profile-dropdown-email">{displayEmail}</span>
+                        </div>
+                      </div>
+                      <div className="home-profile-dropdown-divider" />
+                      <Link
+                        to="/profile"
+                        className="home-profile-item"
+                        role="menuitem"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          setProfileMenuOpen(false);
+                        }}
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        to="/settings"
+                        className="home-profile-item"
+                        role="menuitem"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          setProfileMenuOpen(false);
+                        }}
+                      >
+                        Settings
+                      </Link>
+                      <button
+                        type="button"
+                        className="home-profile-item home-profile-item--logout"
+                        role="menuitem"
+                        onClick={handleLogout}
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <>
                   <Link
@@ -278,14 +373,21 @@ export function Navbar({ toggleTheme, theme, onHomeClick, onToggleNavbar, navbar
                 <>
                   <Link
                     to="/profile"
-                    className="home-user-badge"
+                    className="home-auth-btn home-auth-btn--ghost"
                     onClick={() => setMenuOpen(false)}
                   >
-                    {user.name}
+                    Profile
+                  </Link>
+                  <Link
+                    to="/settings"
+                    className="home-auth-btn home-auth-btn--ghost"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    Settings
                   </Link>
                   <button
                     type="button"
-                    className="home-auth-btn home-auth-btn--ghost"
+                    className="home-auth-btn home-auth-btn--danger"
                     onClick={handleLogout}
                   >
                     Logout
