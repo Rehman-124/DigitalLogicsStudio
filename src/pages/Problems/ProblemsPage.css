@@ -751,7 +751,9 @@
   border-radius: 0.75rem;
   border: 1px solid var(--problems-border);
   background: var(--problems-surface);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .problems-search:focus-within {
@@ -1259,8 +1261,8 @@
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch; /* enables momentum scroll on iOS */
-    overscroll-behavior: contain;      /* stops body from scrolling when sidebar reaches top/bottom */
-    touch-action: pan-y;               /* allow vertical touch scroll inside sidebar */
+    overscroll-behavior: contain; /* stops body from scrolling when sidebar reaches top/bottom */
+    touch-action: pan-y; /* allow vertical touch scroll inside sidebar */
     /* Solid opaque background — no blur needed on a fixed drawer */
     background: #0a1020 !important;
     backdrop-filter: none !important;
@@ -1379,7 +1381,9 @@
   }
 
   /* Step 2: hide the header */
-  .problems-table thead { display: none; }
+  .problems-table thead {
+    display: none;
+  }
 
   /* Step 3: tbody = vertical stack */
   .problems-table tbody {
@@ -1400,7 +1404,9 @@
     border-radius: 0.875rem;
     background: var(--problems-surface-soft);
     cursor: pointer;
-    transition: background 0.16s ease, border-color 0.16s ease;
+    transition:
+      background 0.16s ease,
+      border-color 0.16s ease;
   }
 
   .problems-table tbody tr:hover,
@@ -1417,10 +1423,14 @@
   }
 
   /* ── col 1: listId — HIDE ── */
-  .problems-table td:nth-child(1) { display: none; }
+  .problems-table td:nth-child(1) {
+    display: none;
+  }
 
   /* ── col 2: title + topic ── */
-  .problems-table td:nth-child(2) { order: 1; }
+  .problems-table td:nth-child(2) {
+    order: 1;
+  }
 
   .problems-table td:nth-child(2) .problem-title-text {
     display: block;
@@ -1438,7 +1448,9 @@
   }
 
   /* ── col 3: acceptance % — HIDE ── */
-  .problems-table td:nth-child(3) { display: none; }
+  .problems-table td:nth-child(3) {
+    display: none;
+  }
 
   /* ── col 4 + col 5: difficulty & lock on ONE row ── */
   /* Wrap them by making both inline-flex and letting the card's
@@ -1932,4 +1944,187 @@
 
 .problems-page.theme-light .cheat-formula-display code {
   color: #1d4ed8;
+}
+
+/* ══════════════════════════════════════════════
+   Inline Daily Challenge Banner (center column)
+   ══════════════════════════════════════════════ */
+.inline-daily-challenge {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.1rem 1.4rem;
+  margin-bottom: 0.75rem;
+  border-radius: 1.1rem;
+  border: 1px solid rgba(245, 158, 11, 0.22);
+  background: linear-gradient(
+    120deg,
+    rgba(217, 119, 6, 0.07) 0%,
+    rgba(15, 23, 42, 0.75) 55%,
+    rgba(99, 102, 241, 0.05) 100%
+  );
+  position: relative;
+  overflow: hidden;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.inline-daily-challenge::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 10% 50%,
+    rgba(245, 158, 11, 0.07) 0%,
+    transparent 65%
+  );
+  pointer-events: none;
+}
+
+.inline-daily-challenge:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+  box-shadow: 0 4px 24px rgba(245, 158, 11, 0.08);
+}
+
+.inline-daily-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 220px;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(245, 158, 11, 0.12);
+  padding-right: 1.4rem;
+}
+
+.inline-daily-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #f59e0b;
+}
+
+.inline-daily-icon {
+  color: #fbbf24;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.55));
+  flex-shrink: 0;
+}
+
+.inline-daily-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--problems-text-strong);
+  line-height: 1.3;
+}
+
+.inline-daily-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.inline-daily-topic {
+  font-size: 0.74rem;
+  color: var(--problems-text-soft);
+}
+
+.inline-daily-right {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.inline-daily-desc {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--problems-text-soft);
+  line-height: 1.55;
+}
+
+.inline-daily-btn {
+  align-self: flex-start;
+  padding: 0.45rem 1rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.13) 0%,
+    rgba(217, 119, 6, 0.06) 100%
+  );
+  color: #fbbf24;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.inline-daily-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.22) 0%,
+    rgba(217, 119, 6, 0.12) 100%
+  );
+  border-color: #fbbf24;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.14);
+}
+
+/* Responsive: stack on smaller screens */
+@media (max-width: 720px) {
+  .inline-daily-challenge {
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: 1rem;
+  }
+
+  .inline-daily-left {
+    min-width: unset;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgba(245, 158, 11, 0.12);
+    padding-right: 0;
+    padding-bottom: 0.85rem;
+  }
+
+  .inline-daily-btn {
+    align-self: stretch;
+    text-align: center;
+  }
+}
+
+/* Light theme override */
+.problems-page.theme-light .inline-daily-challenge {
+  background: linear-gradient(
+    120deg,
+    rgba(254, 243, 199, 0.6) 0%,
+    rgba(255, 255, 255, 0.9) 60%
+  );
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.problems-page.theme-light .inline-daily-title {
+  color: #1e293b;
+}
+
+.problems-page.theme-light .inline-daily-desc {
+  color: #64748b;
+}
+
+.problems-page.theme-light .inline-daily-btn {
+  color: #d97706;
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.problems-page.theme-light .inline-daily-btn:hover {
+  background: rgba(245, 158, 11, 0.16);
+  border-color: #d97706;
 }

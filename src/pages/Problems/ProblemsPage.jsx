@@ -51,7 +51,11 @@ const leftNavSections = [
     items: [
       { label: "Problems Library", icon: LibraryBig },
       { label: "K-Map Arena", icon: Layers, topicSlug: "k-map", badge: "Core" },
-      { label: "Sequential Arena", icon: Sparkles, topicSlug: "sequential-circuits" },
+      {
+        label: "Sequential Arena",
+        icon: Sparkles,
+        topicSlug: "sequential-circuits",
+      },
       { label: "Number Arena", icon: Binary, topicSlug: "number-systems" },
     ],
   },
@@ -60,7 +64,12 @@ const leftNavSections = [
     items: [
       { label: "Circuit Forge", icon: Cpu, path: "/boolforge" },
       { label: "K-Map Studio", icon: Grid, path: "/kmapgenerator" },
-      { label: "DLD Trainer Board", icon: Tv, path: "/trainer-board", badge: "Live" },
+      {
+        label: "DLD Trainer Board",
+        icon: Tv,
+        path: "/trainer-board",
+        badge: "Live",
+      },
       { label: "Timing Diagrams", icon: Activity, path: "/timing-diagrams" },
     ],
   },
@@ -68,18 +77,42 @@ const leftNavSections = [
     title: "Design Utilities",
     items: [
       { label: "Circuit Cost Calc", icon: Coins, path: "/circuit-cost" },
-      { label: "Parity Calculator", icon: Calculator, path: "/paritybitcalculator" },
-      { label: "Universal Gates Lab", icon: FolderHeart, path: "/universal-gates" },
+      {
+        label: "Parity Calculator",
+        icon: Calculator,
+        path: "/paritybitcalculator",
+      },
+      {
+        label: "Universal Gates Lab",
+        icon: FolderHeart,
+        path: "/universal-gates",
+      },
       { label: "Standard Forms", icon: GraduationCap, path: "/standard-forms" },
     ],
   },
   {
     title: "Arithmetic Circuits",
     items: [
-      { label: "Adders & Subtractors", icon: Cpu, path: "/arithmetic/binary-add-subtractor" },
-      { label: "Binary Multipliers", icon: Cpu, path: "/arithmetic/binary-multipliers" },
-      { label: "Magnitude Comparators", icon: Cpu, path: "/arithmetic/magnitude-comparator" },
-      { label: "Signed Numbers", icon: Binary, path: "/arithmetic/signed-unsigned" },
+      {
+        label: "Adders & Subtractors",
+        icon: Cpu,
+        path: "/arithmetic/binary-add-subtractor",
+      },
+      {
+        label: "Binary Multipliers",
+        icon: Cpu,
+        path: "/arithmetic/binary-multipliers",
+      },
+      {
+        label: "Magnitude Comparators",
+        icon: Cpu,
+        path: "/arithmetic/magnitude-comparator",
+      },
+      {
+        label: "Signed Numbers",
+        icon: Binary,
+        path: "/arithmetic/signed-unsigned",
+      },
     ],
   },
   {
@@ -94,9 +127,21 @@ const leftNavSections = [
   {
     title: "Sequential & Storage",
     items: [
-      { label: "Latches & Flip-Flops", icon: Sparkles, path: "/sequential/flip-flops" },
-      { label: "Registers & Loading", icon: Layers, path: "/registers/shift-registers" },
-      { label: "Ripple Counters", icon: Binary, path: "/registers/ripple-counters" },
+      {
+        label: "Latches & Flip-Flops",
+        icon: Sparkles,
+        path: "/sequential/flip-flops",
+      },
+      {
+        label: "Registers & Loading",
+        icon: Layers,
+        path: "/registers/shift-registers",
+      },
+      {
+        label: "Ripple Counters",
+        icon: Binary,
+        path: "/registers/ripple-counters",
+      },
       { label: "State Analysis", icon: Compass, path: "/sequential/analysis" },
     ],
   },
@@ -104,8 +149,16 @@ const leftNavSections = [
     title: "Memory Systems",
     items: [
       { label: "Memory Basics", icon: BookOpen, path: "/memory/basics" },
-      { label: "Programmable PLA", icon: Cpu, path: "/memory/programmable-logic-array" },
-      { label: "Random Access Memory", icon: Lock, path: "/memory/random-access-memory" },
+      {
+        label: "Programmable PLA",
+        icon: Cpu,
+        path: "/memory/programmable-logic-array",
+      },
+      {
+        label: "Random Access Memory",
+        icon: Lock,
+        path: "/memory/random-access-memory",
+      },
     ],
   },
   {
@@ -113,7 +166,11 @@ const leftNavSections = [
     items: [
       { label: "Chapter Solvers", icon: BookOpen, path: "/book" },
       { label: "Logic Gate Guide", icon: Info, path: "/gates" },
-      { label: "Boolean Identities", icon: GraduationCap, path: "/boolean/identities" },
+      {
+        label: "Boolean Identities",
+        icon: GraduationCap,
+        path: "/boolean/identities",
+      },
       { label: "Boolean Laws", icon: BookOpen, path: "/boolean/laws" },
     ],
   },
@@ -161,7 +218,10 @@ const problemTopicLandingMap = {
       "Practice number conversion, complements, signed representation, and binary arithmetic across common base systems.",
     links: [
       { to: "/number-systems/calculator", label: "Number system calculator" },
-      { to: "/number-systems/number-conversion", label: "Base conversion tutorial" },
+      {
+        to: "/number-systems/number-conversion",
+        label: "Base conversion tutorial",
+      },
       { to: "/arithmetic/complements", label: "2's complement guide" },
     ],
   },
@@ -184,7 +244,10 @@ const problemTopicLandingMap = {
     links: [
       { to: "/sequential/flip-flops", label: "Flip-flops tutorial" },
       { to: "/sequential/flip-flop-types", label: "Flip-flop types" },
-      { to: "/problems/sequential-circuits", label: "Sequential circuit problems" },
+      {
+        to: "/problems/sequential-circuits",
+        label: "Sequential circuit problems",
+      },
     ],
   },
 };
@@ -367,12 +430,10 @@ export default function ProblemsPage() {
   const { user } = useAuth();
   const { theme, toggle: toggleTheme } = useTheme();
   const topicLanding = topicSlug ? problemTopicLandingMap[topicSlug] : null;
-  
+
   const bannerRef = React.useRef(null);
   const tweenRef = React.useRef(null);
   const resumeTimeoutRef = React.useRef(null);
-
-
 
   const getActiveItem = () => {
     if (topicSlug === "k-map") return "K-Map Arena";
@@ -472,11 +533,10 @@ export default function ProblemsPage() {
     if (maxScroll <= 0) return;
 
     // Check direction based on previous destination
-    const isGoingToZero = tweenRef.current && tweenRef.current.vars.scrollLeft === 0;
+    const isGoingToZero =
+      tweenRef.current && tweenRef.current.vars.scrollLeft === 0;
     startAutoscroll(!isGoingToZero);
   };
-
-
 
   const [activeGroup, setActiveGroup] = React.useState(
     topicLanding?.group || "All Topics",
@@ -593,12 +653,36 @@ export default function ProblemsPage() {
   // Rotating quick reference formula cheat-sheet card
   const cheatSheetFormula = React.useMemo(() => {
     const formulas = [
-      { name: "De Morgan's Theorem", formula: "(A · B)' = A' + B'", description: "Negated product equals sum of negations." },
-      { name: "De Morgan's Theorem 2", formula: "(A + B)' = A' · B'", description: "Negated sum equals product of negations." },
-      { name: "Absorption Law", formula: "A + A · B = A", description: "The term A absorbs A · B." },
-      { name: "Consensus Theorem", formula: "A·B + A'·C + B·C = A·B + A'·C", description: "B·C is redundant and can be removed." },
-      { name: "Distributive Law", formula: "A + (B · C) = (A + B) · (A + C)", description: "OR distributes over AND." },
-      { name: "Shannon's Expansion", formula: "F(A, B) = A · F(1, B) + A' · F(0, B)", description: "Used to expand boolean functions." }
+      {
+        name: "De Morgan's Theorem",
+        formula: "(A · B)' = A' + B'",
+        description: "Negated product equals sum of negations.",
+      },
+      {
+        name: "De Morgan's Theorem 2",
+        formula: "(A + B)' = A' · B'",
+        description: "Negated sum equals product of negations.",
+      },
+      {
+        name: "Absorption Law",
+        formula: "A + A · B = A",
+        description: "The term A absorbs A · B.",
+      },
+      {
+        name: "Consensus Theorem",
+        formula: "A·B + A'·C + B·C = A·B + A'·C",
+        description: "B·C is redundant and can be removed.",
+      },
+      {
+        name: "Distributive Law",
+        formula: "A + (B · C) = (A + B) · (A + C)",
+        description: "OR distributes over AND.",
+      },
+      {
+        name: "Shannon's Expansion",
+        formula: "F(A, B) = A · F(1, B) + A' · F(0, B)",
+        description: "Used to expand boolean functions.",
+      },
     ];
     const day = new Date().getDate();
     return formulas[day % formulas.length];
@@ -725,7 +809,7 @@ export default function ProblemsPage() {
       <button
         type="button"
         className={`mobile-sidebar-toggle ${isMobileSidebarOpen ? "is-active" : ""}`}
-        onClick={() => setIsMobileSidebarOpen(prev => !prev)}
+        onClick={() => setIsMobileSidebarOpen((prev) => !prev)}
         aria-label="Toggle navigation drawer"
       >
         {isMobileSidebarOpen ? <X size={22} /> : <Menu size={22} />}
@@ -742,7 +826,9 @@ export default function ProblemsPage() {
       <Navbar toggleTheme={toggleTheme} theme={theme} />
 
       <main className="problems-shell">
-        <aside className={`problems-sidebar ${isMobileSidebarOpen ? "is-open" : ""}`}>
+        <aside
+          className={`problems-sidebar ${isMobileSidebarOpen ? "is-open" : ""}`}
+        >
           <div className="problems-sidebar-brand">
             <span className="problems-sidebar-badge">Practice Arena</span>
             <h1>{topicLanding?.title || "Problems"}</h1>
@@ -776,7 +862,9 @@ export default function ProblemsPage() {
                           <span>{item.label}</span>
                         </span>
                         {item.badge ? (
-                          <span className={`problems-sidebar-link-badge badge-${item.badge.toLowerCase()}`}>
+                          <span
+                            className={`problems-sidebar-link-badge badge-${item.badge.toLowerCase()}`}
+                          >
                             {item.badge}
                           </span>
                         ) : null}
@@ -816,8 +904,8 @@ export default function ProblemsPage() {
 
         <section className="problems-center">
           <div className="problems-banner-slider">
-            <div 
-              className="problems-banner-row" 
+            <div
+              className="problems-banner-row"
               ref={bannerRef}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
@@ -836,6 +924,42 @@ export default function ProblemsPage() {
               ))}
             </div>
           </div>
+
+          {/* ── Inline Daily Challenge Banner ── */}
+          {dailyProblem && (
+            <div className="inline-daily-challenge">
+              <div className="inline-daily-left">
+                <div className="inline-daily-eyebrow">
+                  <Sparkles size={14} className="inline-daily-icon" />
+                  <span>Daily Challenge</span>
+                </div>
+                <h3 className="inline-daily-title">{dailyProblem.title}</h3>
+                <div className="inline-daily-meta">
+                  <span
+                    className={`difficulty-pill ${difficultyTone[dailyProblem.difficulty]}`}
+                  >
+                    {dailyProblem.difficulty}
+                  </span>
+                  <span className="inline-daily-topic">
+                    {dailyProblem.topic}
+                  </span>
+                  <span className="xp-bonus">+100 XP</span>
+                </div>
+              </div>
+              <div className="inline-daily-right">
+                <p className="inline-daily-desc">
+                  {dailyProblem.description.slice(0, 110)}…
+                </p>
+                <button
+                  type="button"
+                  className="inline-daily-btn"
+                  onClick={handleSolveDaily}
+                >
+                  Solve Today's Challenge →
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="problems-filter-chip-row">
             {problemFilterGroups.map((group) => (
@@ -857,7 +981,10 @@ export default function ProblemsPage() {
           </div>
 
           {topicLanding ? (
-            <section className="problems-widget" aria-labelledby="topic-cluster-links">
+            <section
+              className="problems-widget"
+              aria-labelledby="topic-cluster-links"
+            >
               <div className="problems-widget-head">
                 <div>
                   <span className="problems-widget-label">Topic Cluster</span>
@@ -1072,11 +1199,18 @@ export default function ProblemsPage() {
               <div className="rank-name">{rankName}</div>
             </div>
             <div className="xp-bar-container">
-              <div className="xp-bar-progress" style={{ width: `${xpPercentage}%` }}></div>
+              <div
+                className="xp-bar-progress"
+                style={{ width: `${xpPercentage}%` }}
+              ></div>
             </div>
             <div className="xp-details">
               <span>{xp} XP</span>
-              <span>{nextLevelXp - xp > 0 ? `${nextLevelXp - xp} XP to next lvl` : "Max Lvl"}</span>
+              <span>
+                {nextLevelXp - xp > 0
+                  ? `${nextLevelXp - xp} XP to next lvl`
+                  : "Max Lvl"}
+              </span>
             </div>
           </div>
 
@@ -1090,7 +1224,12 @@ export default function ProblemsPage() {
               <div className="goal-text">Solve 5 problems this week</div>
               <div className="goal-progress-wrap">
                 <div className="goal-progress-bar">
-                  <div className="goal-progress-fill" style={{ width: `${Math.min(100, (solvedThisWeek / 5) * 100)}%` }}></div>
+                  <div
+                    className="goal-progress-fill"
+                    style={{
+                      width: `${Math.min(100, (solvedThisWeek / 5) * 100)}%`,
+                    }}
+                  ></div>
                 </div>
                 <span className="goal-ratio">{solvedThisWeek}/5</span>
               </div>
@@ -1107,13 +1246,19 @@ export default function ProblemsPage() {
               <div className="daily-body">
                 <h4>{dailyProblem.title}</h4>
                 <div className="daily-meta">
-                  <span className={`difficulty-pill ${difficultyTone[dailyProblem.difficulty]}`}>
+                  <span
+                    className={`difficulty-pill ${difficultyTone[dailyProblem.difficulty]}`}
+                  >
                     {dailyProblem.difficulty}
                   </span>
                   <span className="xp-bonus">+100 XP</span>
                 </div>
               </div>
-              <button type="button" className="solve-daily-btn" onClick={handleSolveDaily}>
+              <button
+                type="button"
+                className="solve-daily-btn"
+                onClick={handleSolveDaily}
+              >
                 Solve Challenge
               </button>
             </div>
@@ -1130,7 +1275,9 @@ export default function ProblemsPage() {
               <div className="cheat-formula-display">
                 <code>{cheatSheetFormula.formula}</code>
               </div>
-              <p className="cheat-formula-desc">{cheatSheetFormula.description}</p>
+              <p className="cheat-formula-desc">
+                {cheatSheetFormula.description}
+              </p>
             </div>
           </div>
 

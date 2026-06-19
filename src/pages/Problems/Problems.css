@@ -204,8 +204,8 @@
 .prob-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(2px);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -214,14 +214,14 @@
 }
 
 .prob-modal {
-  background: var(--card-bg-solid, #141b2d);
-  border: 1px solid var(--border-color, #2a3550);
+  background: #0e1525;
+  border: 1px solid rgba(42, 53, 80, 0.9);
   border-radius: 16px;
   width: 100%;
   max-width: 960px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.85);
 }
 
 .prob-modal-header {
@@ -229,10 +229,10 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 1.5rem 1.75rem 1rem;
-  border-bottom: 1px solid var(--border-color, #2a3550);
+  border-bottom: 1px solid rgba(42, 53, 80, 0.9);
   position: sticky;
   top: 0;
-  background: var(--card-bg-solid, #141b2d);
+  background: #0e1525;
   z-index: 2;
 }
 
