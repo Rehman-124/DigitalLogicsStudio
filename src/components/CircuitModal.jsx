@@ -25,6 +25,20 @@ const S = {
     flexShrink: 0,
     flexWrap: "wrap",
   },
+  descBar: {
+    background: "var(--bg-medium,#141b2d)",
+    borderBottom: "1px solid var(--border-color,#2a3550)",
+    padding: "1rem 1.5rem",
+    display: "flex",
+    alignItems: "center",
+    gap: "1rem",
+    flexShrink: 0,
+    flexWrap: "wrap",
+    fontSize: "0.82rem",
+    color: "var(--secondary-text,#8899aa)",
+    minHeight: 42,
+    overflow: "hidden",
+  },
   ioBar: {
     display: "flex",
     alignItems: "center",
@@ -84,6 +98,8 @@ const S = {
   canvas: {
     flex: 1,
     overflow: "hidden",
+    minHeight: 0,
+    position: "relative",
   },
   resultPanel: {
     width: 420,
@@ -708,16 +724,75 @@ const CircuitModal = ({
         </button>
       </div>
 
+      {/* ── Problem description bar ── */}
+      {!isExperimentMode && problem.description && (
+        <div style={S.descBar}>
+          {/* 1. Left Gradient Bar */}
+          <span
+            style={{
+              width: 5,
+              minWidth: 3,
+              alignSelf: "stretch",
+              background: "linear-gradient(180deg,#00d4ff,#8b5cf6)",
+              borderRadius: 999,
+              flexShrink: 0,
+            }}
+          />
+
+          {/* 2. Problem Description Text */}
+          <span
+            style={{
+              color: "var(--text-color,#e8f0ff)",
+              lineHeight: 2.5,
+              flex: "0 1 auto", // CHANGED: Prevents the text box from stretching to the edge
+              minWidth: 0,
+              fontSize: "1rem",
+              letterSpacing: "0.01em",
+            }}
+          >
+            <b>PROBLEM :</b> {problem.description}
+          </span>
+
+          {/* 3. Equations Container */}
+          {problem.equations?.length > 0 && (
+            <div
+              style={{
+                display: "flex",
+                gap: "0.45rem",
+                flexWrap: "wrap",
+                flexShrink: 0,
+              }}
+            >
+              {problem.equations.map((eq, i) => (
+                <code
+                  key={i}
+                  style={{
+                    background: "rgba(139,92,246,0.12)",
+                    border: "1px solid rgba(139,92,246,0.3)",
+                    borderRadius: 6,
+                    padding: "0.2rem 0.65rem",
+                    fontSize: "1rem",
+                    color: "#c4b5fd",
+                    fontFamily: "monospace",
+                    letterSpacing: "0.03em",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {eq}
+                </code>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Body ── */}
       <div style={S.body}>
-        <div style={S.canvas}>
+        <div style={S.canvas} className="circuit-modal-canvas">
           <Boolforge
+            embedded={true}
             onCircuitChange={handleCircuitChange}
             portNames={{ inputs: problem.inputs, outputs: problem.outputs }}
-            // Pass the expression so Boolforge auto-builds the circuit via its
-            // existing parseExpressionToCircuit + hasAutoBuilt hook.
-            // Only set these in experiment mode; leave null for graded problems
-            // so Boolforge starts with a blank canvas as before.
             simplifiedExpression={isExperimentMode ? boolforgeExpression : null}
             variables={isExperimentMode ? variables : []}
           />

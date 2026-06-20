@@ -481,3 +481,9 @@ body:has(.boolforge-page) {
   left: 16px;
   color: var(--accent-primary, #00ff88);
 }
+
+/* ── Embedded mode (inside CircuitModal) — fill the flex body, not 100vh ── */
+.circuit-modal-canvas .container.circuit-maker {
+  height: 100% !important;
+  min-height: 0 !important;
+}
