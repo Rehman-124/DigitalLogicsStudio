@@ -4929,6 +4929,153 @@ select:focus-visible {
 }
 
 /* ─── K-Map page shell ───────────────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════════
+   KMAP WORKSPACE LAYOUT — Split-pane engineering UI
+   Left: sticky sidebar controls | Right: scrollable canvas
+   ═══════════════════════════════════════════════════════════ */
+
+/* Workspace row — the two-pane shell */
+.kmap-workspace {
+  display: flex;
+  align-items: flex-start;        /* CRITICAL: allows sticky to work */
+  gap: 0;
+  min-height: calc(100vh - 180px); /* fills below the header */
+  padding: 0 24px 48px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+/* ── LEFT SIDEBAR ───────────────────────────────────────────── */
+.kmap-sidebar {
+  width: 380px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 72px;                      /* clears the Navbar height */
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(96,165,250,0.3) transparent;
+  padding-right: 4px;             /* breathing room for scrollbar */
+}
+
+.kmap-sidebar::-webkit-scrollbar { width: 4px; }
+.kmap-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(96,165,250,0.3);
+  border-radius: 99px;
+}
+
+.kmap-sidebar-inner {
+  padding: 0 12px 24px 0;         /* right gap between sidebar and canvas */
+}
+
+/* Small label above controls — workspace convention */
+.kmap-sidebar-label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-secondary);
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(96,165,250,0.15);
+}
+
+/* ── RIGHT CANVAS ───────────────────────────────────────────── */
+.kmap-canvas {
+  flex: 1;
+  min-width: 0;                   /* prevents flex overflow */
+  padding-left: 24px;
+  border-left: 1px solid rgba(96,165,250,0.1);
+}
+
+/* Stack of result cards */
+.kmap-results-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;                         /* .kmap-card already has margin-bottom */
+}
+
+/* ── EMPTY STATE ────────────────────────────────────────────── */
+.kmap-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 420px;
+  text-align: center;
+  padding: var(--spacing-3xl) var(--spacing-xl);
+  border: 2px dashed rgba(96,165,250,0.2);
+  border-radius: var(--radius-xl);
+  background: rgba(10,14,26,0.3);
+}
+
+.kmap-empty-icon {
+  font-size: 4rem;
+  color: rgba(96,165,250,0.25);
+  margin-bottom: 16px;
+  line-height: 1;
+}
+
+.kmap-empty-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.kmap-empty-hint {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-width: 360px;
+  line-height: 1.7;
+}
+
+.kmap-empty-hint strong {
+  color: var(--accent-primary);
+}
+
+/* ── RESPONSIVE COLLAPSE ────────────────────────────────────── */
+
+/* Tablets: shrink sidebar */
+@media (max-width: 1024px) {
+  .kmap-workspace {
+    padding: 0 16px 40px;
+  }
+  .kmap-sidebar {
+    width: 300px;
+  }
+}
+
+/* Mobile: stack vertically, sidebar becomes top bar */
+@media (max-width: 768px) {
+  .kmap-workspace {
+    flex-direction: column;
+    gap: 0;
+    padding: 0 14px 32px;
+  }
+
+  .kmap-sidebar {
+    width: 100%;
+    position: static;             /* un-sticky on mobile */
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 0;
+  }
+
+  .kmap-sidebar-inner {
+    padding: 0 0 16px 0;
+  }
+
+  .kmap-canvas {
+    padding-left: 0;
+    border-left: none;
+    border-top: 1px solid rgba(96,165,250,0.1);
+    padding-top: 20px;
+  }
+}
+
 .kmap-page {
   display: flex;
   flex-direction: column;
