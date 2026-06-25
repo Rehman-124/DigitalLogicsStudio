@@ -1198,7 +1198,7 @@ summary:hover {
 }
 
 /* Header gradient area */
-[data-theme="light"] .kmap-header-gradient {
+/* [data-theme="light"] .kmap-header-gradient {
   background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
 }
 [data-theme="light"] .kmap-main-title {
@@ -1206,7 +1206,7 @@ summary:hover {
 }
 [data-theme="light"] .kmap-subtitle {
   color: var(--secondary-text) !important;
-}
+} */
 [data-theme="light"] .note {
   background: rgba(251, 191, 36, 0.12);
   color: #b45309;

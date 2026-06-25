@@ -73,14 +73,14 @@ const KMapGenerator = () => {
 
         <main className="kmap-page-main">
             {/* Page-level header stays centered above the workspace */}
-            <div className="kmap-header-gradient">
+            {/* <div className="kmap-header-gradient">
                 <h1 className="kmap-main-title">
                     Karnaugh Map Generator
                 </h1>
                 <p className="kmap-subtitle">
                     Simplify Boolean expressions with interactive K-Maps
                 </p>
-            </div>
+            </div> */}
 
             <div className="kmap-workspace">
             {/* LEFT SIDEBAR — sticky control panel */}
@@ -115,6 +115,7 @@ const KMapGenerator = () => {
             {/* RIGHT CANVAS — scrollable results workspace */}
             <div className="kmap-canvas">
                 {/* Empty state shown before first generation */}
+                <p className="kmap-sidebar-label">Karnaugh Map</p>
                 {!showSolution && (
                     <div className="kmap-empty-state">
                         <div className="kmap-empty-icon">⊕</div>
