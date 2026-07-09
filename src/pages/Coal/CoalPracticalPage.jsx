@@ -52,6 +52,23 @@ const PLANNED_PRACTICALS = [
     ready: true,
     path: "/resources/coal/practical/assembly-drills",
   },
+  {
+    key: "addressing-mode-playground",
+    title: "Addressing Mode Playground",
+    description:
+      "Build instructions, calculate effective addresses, and quiz yourself on all 8 addressing modes.",
+    icon: Cpu,
+    ready: true,
+    path: "/resources/coal/practical/addressing-mode-playground",
+  },
+  {
+    key: "instruction-laboratory",
+    title: "Instruction Laboratory",
+    description: "A complete searchable database for interactive x86 architectures with a live execution sandbox.",
+    icon: Terminal, 
+    ready: true,
+    path: "/resources/coal/practical/instruction-laboratory", 
+  },
 ];
 
 function CoalPracticalPage() {

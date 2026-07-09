@@ -16,6 +16,8 @@ import DlsMentorWidget from "./components/DlsMentorWidget/DlsMentorWidget";
 import InstructionTraceLabPage from "./pages/Coal/InstructionTraceLabPage";
 import StackMemorySimulatorPage from "./pages/Coal/StackMemorySimulatorPage";
 import AssemblyDrillsPage from "./pages/Coal/AssemblyDrillsPage";
+import AddressingModePlaygroundPage from "./pages/Coal/AddressingModePlaygroundPage";
+import InstructionLaboratoryPage from "./pages/Coal/InstructionLaboratoryPage";
 // UTILS / OTHER TOOLS:
 import ScrollToTop from "./utils/ScrollToTop";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -181,6 +183,7 @@ const MemoryConstructionRAM = lazy(
 const DLDTrainerBoard = lazy(() => import("./pages/TrainerBoard"));
 const LoginPage = lazy(() => import("./pages/Auth/LoginPage"));
 const SignupPage = lazy(() => import("./pages/Auth/SignupPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/Auth/ForgotPasswordPage"));
 const ProfilePage = lazy(() => import("./pages/Auth/ProfilePage"));
 const SettingsPage = lazy(() => import("./pages/Auth/SettingsPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
@@ -233,6 +236,7 @@ const AppContent = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route
             path="/profile"
             element={
@@ -482,11 +486,7 @@ const AppContent = () => {
             element={<MemoryConstructionRAM />}
           />
 
-          {/* ── Misc ──────────────────────────────────────────── */}
-          <Route path="/trainer-board" element={<DLDTrainerBoard />} />
-          <Route path="*" element={<NotFoundPage />} />
-
-          {/* Coal routes */}
+          {/* ── COAL Practical Labs ───────────────────────────── */}
           <Route
             path="/resources/coal/practical/instruction-trace-lab"
             element={<InstructionTraceLabPage />}
@@ -499,6 +499,17 @@ const AppContent = () => {
             path="/resources/coal/practical/assembly-drills"
             element={<AssemblyDrillsPage />}
           />
+            path="/resources/coal/practical/addressing-mode-playground"
+            element={<AddressingModePlaygroundPage />}
+          />
+          <Route
+            path="/resources/coal/practical/instruction-laboratory"
+            element={<InstructionLaboratoryPage />}
+          />
+
+          {/* ── Misc ──────────────────────────────────────────── */}
+          <Route path="/trainer-board" element={<DLDTrainerBoard />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
     </>

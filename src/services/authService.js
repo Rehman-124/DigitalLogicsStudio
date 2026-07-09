@@ -21,6 +21,21 @@ const authService = {
     return data;
   },
 
+  forgotPassword: async (payload) => {
+    const { data } = await apiClient.post("/auth/forgot-password", payload);
+    return data;
+  },
+
+  verifyResetOtp: async (payload) => {
+    const { data } = await apiClient.post("/auth/verify-reset-otp", payload);
+    return data;
+  },
+
+  resetPassword: async (payload) => {
+    const { data } = await apiClient.post("/auth/reset-password", payload);
+    return data;
+  },
+
   // Uses the existing /progress route (progressService pattern)
   markProblemSolved: async (problemId) => {
     const { data } = await apiClient.post(
