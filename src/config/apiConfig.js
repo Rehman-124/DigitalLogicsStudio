@@ -1,9 +1,10 @@
 const LOCAL_API_URL = "http://localhost:5000/api";
 const PRODUCTION_API_URL =
-  "https://digital-logics-studio-backend-three.vercel.app/api";
-// Old Vercel deploy had this URL baked in / set as env — it has no Groq keys.
-const LEGACY_PRODUCTION_API_URL =
   "https://digital-logics-studio-backend.vercel.app/api";
+// The -three deployment is not ours and is stale (missing the newer auth routes).
+// Old builds/envs had it baked in, so rewrite it to the real backend.
+const LEGACY_PRODUCTION_API_URL =
+  "https://digital-logics-studio-backend-three.vercel.app/api";
 
 function normalizeUrl(url) {
   return url.trim().replace(/\/+$/, "");
