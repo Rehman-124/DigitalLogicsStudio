@@ -473,22 +473,28 @@ function buildDailyActivity(calendar) {
 // ─── Build pie data ───────────────────────────────────────────────────────────
 function buildPieData(topicStats) {
   return [
-    { name: "Boolean Algebra", value: topicStats.booleanAlgebra || 0 },
-    { name: "K-Map", value: topicStats.kmap || 0 },
-    { name: "Sequential", value: topicStats.sequential || 0 },
-    { name: "Number Systems", value: topicStats.numberSystems || 0 },
-    { name: "Arithmetic", value: topicStats.arithmetic || 0 },
+    { name: "Boolean Algebra",       value: topicStats.booleanAlgebra || 0 },
+    { name: "Number Systems",        value: topicStats.numberSystems  || 0 },
+    { name: "Arithmetic & HDLs",     value: topicStats.arithmetic     || 0 },
+    { name: "Combinational Circuits",value: topicStats.combinational  || 0 },
+    { name: "Sequential Circuits",   value: topicStats.sequential     || 0 },
+    { name: "Registers & Transfers", value: topicStats.registers      || 0 },
+    { name: "Memory Systems",        value: topicStats.memorySystems  || 0 },
+    { name: "Advanced Logic",        value: topicStats.advancedLogic  || 0 },
   ].filter((d) => d.value > 0);
 }
 
 // ─── Build radar data ─────────────────────────────────────────────────────────
 function buildRadarData(topicStats) {
   return [
-    { subject: "Boolean", A: topicStats.booleanAlgebra || 0 },
-    { subject: "K-Map", A: topicStats.kmap || 0 },
-    { subject: "Sequential", A: topicStats.sequential || 0 },
-    { subject: "Numbers", A: topicStats.numberSystems || 0 },
-    { subject: "Arithmetic", A: topicStats.arithmetic || 0 },
+    { subject: "Boolean",      A: topicStats.booleanAlgebra || 0 },
+    { subject: "Numbers",      A: topicStats.numberSystems  || 0 },
+    { subject: "Arithmetic",   A: topicStats.arithmetic     || 0 },
+    { subject: "Combinational",A: topicStats.combinational  || 0 },
+    { subject: "Sequential",   A: topicStats.sequential     || 0 },
+    { subject: "Registers",    A: topicStats.registers      || 0 },
+    { subject: "Memory",       A: topicStats.memorySystems  || 0 },
+    { subject: "Advanced",     A: topicStats.advancedLogic  || 0 },
   ];
 }
 
@@ -593,6 +599,16 @@ export default function ProfilePage() {
   const streakLongest = summary.streaks?.longest || 0;
   const activeDays = summary.streaks?.activeDays || 0;
 
+  // ── Per-subject problem stats ───────────────────────────────────────────────
+  const problemEntries = Object.values(state.problems || {});
+  const dldSolvedCount    = problemEntries.filter((p) => p.status === "solved"   && p.subject !== "coal").length;
+  const dldAttemptedCount = problemEntries.filter((p) => p.attempts > 0          && p.subject !== "coal").length;
+  const coalSolvedCount    = problemEntries.filter((p) => p.status === "solved"   && p.subject === "coal").length;
+  const coalAttemptedCount = problemEntries.filter((p) => p.attempts > 0          && p.subject === "coal").length;
+
+  const activeSolvedCount    = activeSubject === "COAL" ? coalSolvedCount    : dldSolvedCount;
+  const activeAttemptedCount = activeSubject === "COAL" ? coalAttemptedCount : dldAttemptedCount;
+
   const topicEntries = Object.entries(state.topics || {});
   const avgPct = (arr) =>
     !arr.length
@@ -611,17 +627,22 @@ export default function ProfilePage() {
   // ── COAL part IDs ───────────────────────────────────────────────────────────
   const COAL_PART_IDS = ["part-1","part-2","part-3","part-4","part-5","part-6","part-7"];
 
+  // ── DLD topic stats — keyed by actual coreTopics IDs ───────────────────────
   const topicStats = {
-    booleanAlgebra: avgPct(topicEntries.filter(([id]) => id.startsWith("boolean"))),
-    kmap: avgPct(topicEntries.filter(([id]) => id.startsWith("kmap") || id.includes("kmap"))),
-    sequential: avgPct(topicEntries.filter(([id]) => id.startsWith("seq") || id.startsWith("sequential"))),
-    numberSystems: avgPct(topicEntries.filter(([id]) => id.startsWith("number") || id.startsWith("ns"))),
-    arithmetic: avgPct(topicEntries.filter(([id]) => id.startsWith("arith") || id.startsWith("arithmetic"))),
+    booleanAlgebra:    avgPct(topicEntries.filter(([id]) => id === "boolean-algebra")),
+    numberSystems:     avgPct(topicEntries.filter(([id]) => id === "number-systems")),
+    arithmetic:        avgPct(topicEntries.filter(([id]) => id === "arithmetic-functions-and-hdls")),
+    combinational:     avgPct(topicEntries.filter(([id]) => id === "combinational-circuits")),
+    sequential:        avgPct(topicEntries.filter(([id]) => id === "sequential-circuits")),
+    registers:         avgPct(topicEntries.filter(([id]) => id === "registers-and-register-transfers")),
+    memorySystems:     avgPct(topicEntries.filter(([id]) => id === "memory-systems")),
+    advancedLogic:     avgPct(topicEntries.filter(([id]) => id === "advanced-logic")),
   };
 
+  // ── COAL topic stats — keyed by coalCourseParts IDs (part-1 … part-7) ──────
   const coalTopicStats = {
     foundations:   avgPct(topicEntries.filter(([id]) => id === "part-1")),
-    machineModel:  avgPct(topicEntries.filter(([id]) => id === "part-2")),
+    machineCycle:  avgPct(topicEntries.filter(([id]) => id === "part-2")),
     isaAddressing: avgPct(topicEntries.filter(([id]) => id === "part-3")),
     assembly:      avgPct(topicEntries.filter(([id]) => id === "part-4")),
     x86Arch:       avgPct(topicEntries.filter(([id]) => id === "part-5")),
@@ -666,9 +687,9 @@ export default function ProfilePage() {
       rarity: "common", subject: "DLD",
     },
     {
-      icon: "🗺️", title: "K-Map Pro", desc: "Complete K-Map topics",
-      earned: topicStats.kmap >= 80,
-      progress: topicStats.kmap,
+      icon: "🔀", title: "Circuit Designer", desc: "Complete Combinational Circuits topic",
+      earned: topicStats.combinational >= 80,
+      progress: topicStats.combinational,
       rarity: "epic", subject: "DLD",
     },
     {
@@ -716,8 +737,8 @@ export default function ProfilePage() {
     },
     {
       icon: "⚙️", title: "CPU Explorer", desc: "Complete Machine Model (Part 2)",
-      earned: coalTopicStats.machineModel >= 100,
-      progress: coalTopicStats.machineModel,
+      earned: coalTopicStats.machineCycle >= 100,
+      progress: coalTopicStats.machineCycle,
       rarity: "rare", subject: "COAL",
     },
     {
@@ -751,7 +772,7 @@ export default function ProfilePage() {
   // COAL chart data
   const coalRadarData = [
     { subject: "Foundations",  A: coalTopicStats.foundations   },
-    { subject: "Machine",      A: coalTopicStats.machineModel  },
+    { subject: "Machine",      A: coalTopicStats.machineCycle  },
     { subject: "ISA",          A: coalTopicStats.isaAddressing },
     { subject: "Assembly",     A: coalTopicStats.assembly      },
     { subject: "x86",          A: coalTopicStats.x86Arch       },
@@ -760,7 +781,7 @@ export default function ProfilePage() {
   ];
   const coalPieData = [
     { name: "Foundations",  value: coalTopicStats.foundations   },
-    { name: "Machine Model",value: coalTopicStats.machineModel  },
+    { name: "Machine Model",value: coalTopicStats.machineCycle  },
     { name: "ISA",          value: coalTopicStats.isaAddressing },
     { name: "Assembly",     value: coalTopicStats.assembly      },
     { name: "x86 / IA-32",  value: coalTopicStats.x86Arch       },
@@ -997,14 +1018,14 @@ export default function ProfilePage() {
               </div>
             ) : (
               <div className="pd-stats-grid">
-                {/* Row 1 */}
+                {/* Row 1 — subject-aware */}
                 <StatCard
                   icon="✅"
                   label="Problems Solved"
-                  value={solvedCount}
+                  value={activeSolvedCount}
                   sub={
-                    summary.totalProblems
-                      ? `of ${summary.totalProblems} total`
+                    activeSolvedCount > 0
+                      ? `${activeSubject} problems`
                       : "keep going!"
                   }
                   accent={COLORS.green}
@@ -1012,17 +1033,17 @@ export default function ProfilePage() {
                 <StatCard
                   icon="⚡"
                   label="Attempts Made"
-                  value={attemptedCount}
+                  value={activeAttemptedCount}
                   sub={
-                    solvedCount > 0
-                      ? `${Math.round((solvedCount / Math.max(attemptedCount, 1)) * 100)}% solve rate`
+                    activeSolvedCount > 0
+                      ? `${Math.round((activeSolvedCount / Math.max(activeAttemptedCount, 1)) * 100)}% solve rate`
                       : "no attempts yet"
                   }
                   accent={COLORS.blue}
                 />
                 <StatCard
                   icon="📚"
-                  label="Topics Completed"
+                  label={activeSubject === "COAL" ? "Parts Completed" : "Topics Completed"}
                   value={activeCompletedTopics}
                   sub={
                     activeTotalTopics
@@ -1035,7 +1056,7 @@ export default function ProfilePage() {
                   icon="🎯"
                   label="Completion Rate"
                   value={`${activeCompletionRate}%`}
-                  sub={`${activeSubject} progress`}
+                  sub={`${activeSubject} course progress`}
                   accent={COLORS.pink}
                 />
                 {/* Row 2 */}
@@ -1107,10 +1128,10 @@ export default function ProfilePage() {
                     <TrackCard
                       trackType="DLD TRACK"
                       title="K-Map Simplification"
-                      progress={topicStats.kmap || 0}
-                      lessonsCount={Math.round(((topicStats.kmap || 0) / 100) * 8)}
+                      progress={topicStats.combinational || 0}
+                      lessonsCount={Math.round(((topicStats.combinational || 0) / 100) * 8)}
                       totalLessons={8}
-                      xp={Math.round(((topicStats.kmap || 0) / 100) * 350)}
+                      xp={Math.round(((topicStats.combinational || 0) / 100) * 350)}
                       totalXp={350}
                       streak={streakCurrent}
                       saved={0}
@@ -1138,10 +1159,10 @@ export default function ProfilePage() {
                     <TrackCard
                       trackType="COAL TRACK"
                       title="Foundations & Machine Model"
-                      progress={Math.round((coalTopicStats.foundations + coalTopicStats.machineModel) / 2)}
-                      lessonsCount={Math.round((Math.round((coalTopicStats.foundations + coalTopicStats.machineModel) / 2) / 100) * 6)}
+                      progress={Math.round((coalTopicStats.foundations + coalTopicStats.machineCycle) / 2)}
+                      lessonsCount={Math.round((Math.round((coalTopicStats.foundations + coalTopicStats.machineCycle) / 2) / 100) * 6)}
                       totalLessons={6}
-                      xp={Math.round((Math.round((coalTopicStats.foundations + coalTopicStats.machineModel) / 2) / 100) * 450)}
+                      xp={Math.round((Math.round((coalTopicStats.foundations + coalTopicStats.machineCycle) / 2) / 100) * 450)}
                       totalXp={450}
                       streak={streakCurrent}
                       saved={0}
@@ -1225,10 +1246,11 @@ export default function ProfilePage() {
                     {(() => {
                       const best = bestArea;
                       const label = activeSubject === "COAL"
-                        ? { foundations:"Foundations", machineModel:"Machine Model", isaAddressing:"ISA & Addressing",
-                            assembly:"Assembly Prog.", x86Arch:"x86 / IA-32", ioInterrupts:"I/O & Interrupts", perfPipeline:"Pipelining" }
-                        : { booleanAlgebra:"Boolean Algebra", kmap:"K-Map", sequential:"Sequential",
-                            numberSystems:"Number Systems", arithmetic:"Arithmetic" };
+                        ? { foundations:"Foundations", machineCycle:"Machine Model & Instruction Cycle", isaAddressing:"ISA & Addressing",
+                            assembly:"Assembly Programming", x86Arch:"x86 / IA-32", ioInterrupts:"I/O & Interrupts", perfPipeline:"Architecture & Performance" }
+                        : { booleanAlgebra:"Boolean Algebra", numberSystems:"Number Systems", arithmetic:"Arithmetic & HDLs",
+                            combinational:"Combinational Circuits", sequential:"Sequential Circuits",
+                            registers:"Registers & Transfers", memorySystems:"Memory Systems", advancedLogic:"Advanced Logic" };
                       return (
                         <div className="pd-perf-metric">
                           <div className="pd-perf-metric-head">
@@ -1248,10 +1270,11 @@ export default function ProfilePage() {
                     {(() => {
                       const weak = weakArea;
                       const label = activeSubject === "COAL"
-                        ? { foundations:"Foundations", machineModel:"Machine Model", isaAddressing:"ISA & Addressing",
-                            assembly:"Assembly Prog.", x86Arch:"x86 / IA-32", ioInterrupts:"I/O & Interrupts", perfPipeline:"Pipelining" }
-                        : { booleanAlgebra:"Boolean Algebra", kmap:"K-Map", sequential:"Sequential",
-                            numberSystems:"Number Systems", arithmetic:"Arithmetic" };
+                        ? { foundations:"Foundations", machineCycle:"Machine Model & Instruction Cycle", isaAddressing:"ISA & Addressing",
+                            assembly:"Assembly Programming", x86Arch:"x86 / IA-32", ioInterrupts:"I/O & Interrupts", perfPipeline:"Architecture & Performance" }
+                        : { booleanAlgebra:"Boolean Algebra", numberSystems:"Number Systems", arithmetic:"Arithmetic & HDLs",
+                            combinational:"Combinational Circuits", sequential:"Sequential Circuits",
+                            registers:"Registers & Transfers", memorySystems:"Memory Systems", advancedLogic:"Advanced Logic" };
                       return (
                         <div className="pd-perf-metric">
                           <div className="pd-perf-metric-head">
@@ -1270,14 +1293,26 @@ export default function ProfilePage() {
                     {/* Topics In Progress */}
                     <div className="pd-perf-metric">
                       <div className="pd-perf-metric-head">
-                        <span className="pd-perf-metric-label">Topics In Progress</span>
+                        <span className="pd-perf-metric-label">
+                          {activeSubject === "COAL" ? "Parts In Progress" : "Topics In Progress"}
+                        </span>
                         <span className="pd-perf-metric-val pd-perf-metric-val--blue">
-                          {topicEntries.filter(([,t]) => t.status === "in_progress").length} active
+                          {topicEntries.filter(([id, t]) =>
+                            t.status === "in_progress" &&
+                            (activeSubject === "COAL"
+                              ? COAL_PART_IDS.includes(id)
+                              : DLD_TOPIC_IDS.includes(id))
+                          ).length} active
                         </span>
                       </div>
                       <div className="pd-perf-bar-track">
                         <div className="pd-perf-bar-fill" style={{
-                          width: `${Math.min((topicEntries.filter(([,t]) => t.status === "in_progress").length / Math.max(summary.totalTopics || 8, 1)) * 100, 100)}%`,
+                          width: `${Math.min((topicEntries.filter(([id, t]) =>
+                            t.status === "in_progress" &&
+                            (activeSubject === "COAL"
+                              ? COAL_PART_IDS.includes(id)
+                              : DLD_TOPIC_IDS.includes(id))
+                          ).length / Math.max(activeTotalTopics, 1)) * 100, 100)}%`,
                           background: "linear-gradient(90deg,#3b82f6,#60a5fa)"
                         }}/>
                       </div>
@@ -1373,11 +1408,14 @@ export default function ProfilePage() {
                 Showing {activeSubject === "COAL" ? "COAL" : "DLD"} analytics
               </span>
             </div>
+
             {/* Weekly trend line chart */}
             <div className="pd-card">
               <h2 className="pd-card-title">Weekly Learning Trends</h2>
               <p className="pd-card-sub">
-                Problems solved and attempted per week
+                {activeSubject === "COAL"
+                  ? "Topics opened & completed per week · COAL"
+                  : "Problems solved and attempted per week · DLD"}
               </p>
               {weeklyTrend.length === 0 ? (
                 <p className="pd-empty">
@@ -1641,7 +1679,7 @@ export default function ProfilePage() {
                 Completion percentage per {activeSubject === "COAL" ? "COAL part" : "DLD subject area"}
               </p>
               {/* Subject toggle */}
-              <div className="pd-subject-toggle-wrap" style={{ marginBottom: "1rem" }}>
+              <div className="pd-subject-toggle-wrap" style={{ flexDirection: "row", alignItems: "center", marginBottom: "1rem" }}>
                 <div className="pd-subject-toggle">
                   <button type="button"
                     className={`pd-subject-pill${activeSubject === "DLD" ? " pd-subject-pill--active pd-subject-pill--dld" : ""}`}
@@ -1651,22 +1689,25 @@ export default function ProfilePage() {
                     onClick={() => setActiveSubject("COAL")}>🖥️ COAL</button>
                 </div>
               </div>
-              <ResponsiveContainer width="100%" height={220}>
+              <ResponsiveContainer width="100%" height={240}>
                 <BarChart
                   data={activeSubject === "COAL" ? [
                     { topic: "Foundations",  pct: coalTopicStats.foundations   },
-                    { topic: "Machine",      pct: coalTopicStats.machineModel  },
+                    { topic: "Machine",      pct: coalTopicStats.machineCycle  },
                     { topic: "ISA",          pct: coalTopicStats.isaAddressing },
                     { topic: "Assembly",     pct: coalTopicStats.assembly      },
-                    { topic: "x86",          pct: coalTopicStats.x86Arch       },
+                    { topic: "x86 Arch",     pct: coalTopicStats.x86Arch       },
                     { topic: "I/O",          pct: coalTopicStats.ioInterrupts  },
-                    { topic: "Pipeline",     pct: coalTopicStats.perfPipeline  },
+                    { topic: "Performance",  pct: coalTopicStats.perfPipeline  },
                   ] : [
-                    { topic: "Boolean", pct: topicStats.booleanAlgebra },
-                    { topic: "K-Map",   pct: topicStats.kmap           },
-                    { topic: "Sequential", pct: topicStats.sequential  },
-                    { topic: "Numbers", pct: topicStats.numberSystems  },
-                    { topic: "Arithmetic", pct: topicStats.arithmetic  },
+                    { topic: "Boolean",      pct: topicStats.booleanAlgebra },
+                    { topic: "Numbers",      pct: topicStats.numberSystems  },
+                    { topic: "Arithmetic",   pct: topicStats.arithmetic     },
+                    { topic: "Combinational",pct: topicStats.combinational  },
+                    { topic: "Sequential",   pct: topicStats.sequential     },
+                    { topic: "Registers",    pct: topicStats.registers      },
+                    { topic: "Memory",       pct: topicStats.memorySystems  },
+                    { topic: "Advanced",     pct: topicStats.advancedLogic  },
                   ]}
                   margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
                   onMouseMove={handleChartMouseMove}
@@ -1686,7 +1727,7 @@ export default function ProfilePage() {
                   <Bar dataKey="pct" name="Completion %" radius={[6, 6, 0, 0]}>
                     {(activeSubject === "COAL"
                       ? [COLORS.purple, COLORS.cyan, COLORS.blue, COLORS.amber, COLORS.indigo, COLORS.pink, COLORS.green]
-                      : PIE_COLORS
+                      : [COLORS.blue, COLORS.cyan, COLORS.amber, COLORS.green, COLORS.purple, COLORS.pink, COLORS.indigo, COLORS.red]
                     ).map((c, i) => (
                       <Cell key={i} fill={c} />
                     ))}
@@ -1695,75 +1736,111 @@ export default function ProfilePage() {
               </ResponsiveContainer>
             </div>
 
-            {/* Cards below the graph */}
-            <div className="pd-two-col">
+              <div className="pd-two-col">
               <div className="pd-card">
                 <h2 className="pd-card-title">Skill Progress Tracker</h2>
                 <p className="pd-card-sub">Topic completion across all learning areas</p>
 
-                {/* DLD skills */}
+                {/* DLD skills — all 8 coreTopics */}
                 <div className="pd-skills-subject-header pd-skills-subject-header--dld">
                   <span>⚡</span> Digital Logic Design
                 </div>
                 <div className="pd-skills-list">
-                  <SkillBar label="Boolean Algebra"    pct={topicStats.booleanAlgebra} color={COLORS.blue}   />
-                  <SkillBar label="K-Map Simplification" pct={topicStats.kmap}         color={COLORS.purple} />
-                  <SkillBar label="Sequential Circuits" pct={topicStats.sequential}    color={COLORS.green}  />
-                  <SkillBar label="Number Systems"      pct={topicStats.numberSystems} color={COLORS.amber}  />
-                  <SkillBar label="Arithmetic Functions" pct={topicStats.arithmetic}   color={COLORS.pink}   />
+                  <SkillBar label="Boolean Algebra"          pct={topicStats.booleanAlgebra} color={COLORS.blue}    />
+                  <SkillBar label="Number Systems"           pct={topicStats.numberSystems}  color={COLORS.cyan}    />
+                  <SkillBar label="Arithmetic & HDLs"        pct={topicStats.arithmetic}     color={COLORS.amber}   />
+                  <SkillBar label="Combinational Circuits"   pct={topicStats.combinational}  color={COLORS.green}   />
+                  <SkillBar label="Sequential Circuits"      pct={topicStats.sequential}     color={COLORS.purple}  />
+                  <SkillBar label="Registers & Transfers"    pct={topicStats.registers}      color={COLORS.pink}    />
+                  <SkillBar label="Memory Systems"           pct={topicStats.memorySystems}  color={COLORS.indigo}  />
+                  <SkillBar label="Advanced Logic"           pct={topicStats.advancedLogic}  color={COLORS.red}     />
                 </div>
 
-                {/* COAL skills */}
+                {/* COAL skills — 7 parts from coalCourseOutline */}
                 <div className="pd-skills-subject-header pd-skills-subject-header--coal">
                   <span>🖥️</span> Computer Organization & Assembly
                 </div>
                 <div className="pd-skills-list">
-                  <SkillBar label="Foundations"         pct={coalTopicStats.foundations}   color={COLORS.purple} />
-                  <SkillBar label="Machine Model"       pct={coalTopicStats.machineModel}  color={COLORS.cyan}   />
-                  <SkillBar label="ISA & Addressing"    pct={coalTopicStats.isaAddressing} color={COLORS.blue}   />
-                  <SkillBar label="Assembly Programming" pct={coalTopicStats.assembly}     color={COLORS.amber}  />
-                  <SkillBar label="x86 / IA-32"         pct={coalTopicStats.x86Arch}       color={COLORS.indigo} />
-                  <SkillBar label="I/O & Interrupts"    pct={coalTopicStats.ioInterrupts}  color={COLORS.pink}   />
-                  <SkillBar label="Pipelining"          pct={coalTopicStats.perfPipeline}  color={COLORS.green}  />
+                  <SkillBar label="Part 1 · Foundations"                   pct={coalTopicStats.foundations}   color={COLORS.purple} />
+                  <SkillBar label="Part 2 · Machine Model & Instr. Cycle"  pct={coalTopicStats.machineCycle}  color={COLORS.cyan}   />
+                  <SkillBar label="Part 3 · ISA & Addressing"              pct={coalTopicStats.isaAddressing} color={COLORS.blue}   />
+                  <SkillBar label="Part 4 · Assembly Programming"          pct={coalTopicStats.assembly}      color={COLORS.amber}  />
+                  <SkillBar label="Part 5 · x86 Architecture"              pct={coalTopicStats.x86Arch}       color={COLORS.indigo} />
+                  <SkillBar label="Part 6 · I/O, Interrupts & System Design" pct={coalTopicStats.ioInterrupts} color={COLORS.pink}  />
+                  <SkillBar label="Part 7 · Architecture & Performance"    pct={coalTopicStats.perfPipeline}  color={COLORS.green}  />
                 </div>
               </div>
 
               <div className="pd-card">
-                <h2 className="pd-card-title">Topic Breakdown</h2>
-                <p className="pd-card-sub">Detailed status per topic</p>
-                {topicEntries.length === 0 ? (
+                <h2 className="pd-card-title">
+                  {activeSubject === "COAL" ? "COAL Parts Breakdown" : "DLD Topics Breakdown"}
+                </h2>
+                <p className="pd-card-sub">
+                  Detailed status · {activeSubject === "COAL" ? "Computer Organization & Assembly" : "Digital Logic Design"}
+                </p>
+                {topicEntries.filter(([id]) =>
+                  activeSubject === "COAL" ? COAL_PART_IDS.includes(id) : DLD_TOPIC_IDS.includes(id)
+                ).length === 0 ? (
                   <p className="pd-empty">
-                    No topics started yet. Explore the Problems section!
+                    No {activeSubject} topics started yet. Head to {activeSubject === "COAL" ? "Resources → COAL" : "the Problems section"}!
                   </p>
                 ) : (
                   <ul className="pd-topic-list">
-                    {topicEntries.slice(0, 10).map(([id, t]) => (
-                      <li key={id} className="pd-topic-item">
-                        <div className="pd-topic-header">
-                          <span className="pd-topic-name">{t.title || id}</span>
-                          <span
-                            className={`pd-topic-status pd-topic-status--${t.status}`}
-                          >
-                            {t.status?.replace("_", " ")}
-                          </span>
-                        </div>
-                        <div className="pd-skill-track">
-                          <div
-                            className="pd-skill-fill"
-                            style={{
-                              width: `${t.completionPercentage || 0}%`,
-                              background:
-                                t.status === "completed"
-                                  ? COLORS.green
-                                  : COLORS.blue,
-                            }}
-                          />
-                        </div>
-                        <span className="pd-topic-pct">
-                          {t.completionPercentage || 0}%
-                        </span>
-                      </li>
-                    ))}
+                    {topicEntries
+                      .filter(([id]) =>
+                        activeSubject === "COAL" ? COAL_PART_IDS.includes(id) : DLD_TOPIC_IDS.includes(id)
+                      )
+                      .sort(([idA], [idB]) => {
+                        // Sort COAL by part number, DLD by defined order
+                        if (activeSubject === "COAL") {
+                          return COAL_PART_IDS.indexOf(idA) - COAL_PART_IDS.indexOf(idB);
+                        }
+                        return DLD_TOPIC_IDS.indexOf(idA) - DLD_TOPIC_IDS.indexOf(idB);
+                      })
+                      .map(([id, t]) => {
+                        const COAL_PART_LABELS = {
+                          "part-1": "Part 1 · Foundations",
+                          "part-2": "Part 2 · Machine Model & Instr. Cycle",
+                          "part-3": "Part 3 · ISA & Addressing",
+                          "part-4": "Part 4 · Assembly Programming",
+                          "part-5": "Part 5 · x86 Architecture",
+                          "part-6": "Part 6 · I/O & System Design",
+                          "part-7": "Part 7 · Architecture & Performance",
+                        };
+                        const DLD_TOPIC_LABELS = {
+                          "boolean-algebra": "Boolean Algebra",
+                          "number-systems": "Number Systems",
+                          "arithmetic-functions-and-hdls": "Arithmetic & HDLs",
+                          "combinational-circuits": "Combinational Circuits",
+                          "sequential-circuits": "Sequential Circuits",
+                          "registers-and-register-transfers": "Registers & Transfers",
+                          "memory-systems": "Memory Systems",
+                          "advanced-logic": "Advanced Logic",
+                        };
+                        const displayName = activeSubject === "COAL"
+                          ? (COAL_PART_LABELS[id] || t.title || id)
+                          : (DLD_TOPIC_LABELS[id] || t.title || id);
+                        return (
+                          <li key={id} className="pd-topic-item">
+                            <div className="pd-topic-header">
+                              <span className="pd-topic-name">{displayName}</span>
+                              <span className={`pd-topic-status pd-topic-status--${t.status}`}>
+                                {t.status?.replace("_", " ")}
+                              </span>
+                            </div>
+                            <div className="pd-skill-track">
+                              <div
+                                className="pd-skill-fill"
+                                style={{
+                                  width: `${t.completionPercentage || 0}%`,
+                                  background: t.status === "completed" ? COLORS.green : COLORS.blue,
+                                }}
+                              />
+                            </div>
+                            <span className="pd-topic-pct">{t.completionPercentage || 0}%</span>
+                          </li>
+                        );
+                      })}
                   </ul>
                 )}
               </div>
@@ -1932,17 +2009,24 @@ export default function ProfilePage() {
             },
             {
               id: "topic1",       icon: "📖", label: "Knowledge Seeker",
-              desc: "Complete your first topic",
+              desc: "Complete your first DLD topic",
               xp: 25, category: "Topics",
-              unlocked: completedTopics >= 1,
-              progress: Math.min(completedTopics, 1), total: 1,
+              unlocked: dldTopicsCompleted >= 1,
+              progress: Math.min(dldTopicsCompleted, 1), total: 1,
             },
             {
               id: "topic5",       icon: "📚", label: "Curriculum Runner",
-              desc: "Complete 5 topics",
+              desc: "Complete 5 DLD topics",
               xp: 125, category: "Topics",
-              unlocked: completedTopics >= 5,
-              progress: Math.min(completedTopics, 5), total: 5,
+              unlocked: dldTopicsCompleted >= 5,
+              progress: Math.min(dldTopicsCompleted, 5), total: 5,
+            },
+            {
+              id: "dld_all",      icon: "⚡", label: "DLD Graduate",
+              desc: "Complete all 8 DLD topics",
+              xp: 500, category: "Topics",
+              unlocked: dldTopicsCompleted >= 8,
+              progress: Math.min(dldTopicsCompleted, 8), total: 8,
             },
             {
               id: "streak3",      icon: "🔥", label: "On Fire",
@@ -1992,8 +2076,8 @@ export default function ProfilePage() {
               id: "coal_cpu",     icon: "⚙️", label: "CPU Explorer",
               desc: "Complete Machine Model (Part 2)",
               xp: 150, category: "COAL",
-              unlocked: coalTopicStats.machineModel >= 100,
-              progress: coalTopicStats.machineModel, total: 100, isPercent: true,
+              unlocked: coalTopicStats.machineCycle >= 100,
+              progress: coalTopicStats.machineCycle, total: 100, isPercent: true,
             },
             {
               id: "coal_isa",     icon: "📜", label: "ISA Scholar",
@@ -2352,32 +2436,86 @@ export default function ProfilePage() {
 
         {/* ══════════════ ENGAGEMENT TAB ══════════════ */}
         {activeTab === "engagement" && (() => {
-          const accuracy = solvedCount > 0
-            ? Math.round((solvedCount / Math.max(attemptedCount, 1)) * 100)
-            : 0;
+          // Subject-aware weakest topic
+          const weakestTopicEntry = activeSubject === "COAL"
+            ? Object.entries(coalTopicStats).sort((a, b) => a[1] - b[1])[0]
+            : Object.entries(topicStats).sort((a, b) => a[1] - b[1])[0];
 
-          const weakestTopic = Object.entries(topicStats)
-            .sort((a, b) => a[1] - b[1])[0];
-          const weakestLabel = weakestTopic
-            ? weakestTopic[0].replace(/([A-Z])/g, " $1").trim()
+          const COAL_TOPIC_LABELS = {
+            foundations:   "Foundations",
+            machineCycle:  "Machine Model & Instruction Cycle",
+            isaAddressing: "ISA & Addressing",
+            assembly:      "Assembly Programming",
+            x86Arch:       "x86 / IA-32 Architecture",
+            ioInterrupts:  "I/O, Interrupts & System Design",
+            perfPipeline:  "Architecture & Performance",
+          };
+
+          const DLD_TOPIC_LABELS_MAP = {
+            booleanAlgebra: "Boolean Algebra",
+            numberSystems:  "Number Systems",
+            arithmetic:     "Arithmetic & HDLs",
+            combinational:  "Combinational Circuits",
+            sequential:     "Sequential Circuits",
+            registers:      "Registers & Transfers",
+            memorySystems:  "Memory Systems",
+            advancedLogic:  "Advanced Logic",
+          };
+
+          const weakestLabel = weakestTopicEntry
+            ? (activeSubject === "COAL"
+                ? (COAL_TOPIC_LABELS[weakestTopicEntry[0]] || weakestTopicEntry[0])
+                : (DLD_TOPIC_LABELS_MAP[weakestTopicEntry[0]] || weakestTopicEntry[0]))
             : "a new topic";
 
-          const PORTALS = [
+          const DLD_PORTALS = [
             { icon: "⊕", label: "Circuit Forge",    desc: "Build & simulate logic circuits",   path: "/boolforge",                    color: COLORS.blue   },
             { icon: "◈", label: "K-Map Studio",      desc: "Simplify Boolean expressions",      path: "/kmapgenerator",                 color: COLORS.purple },
             { icon: "#", label: "Number Systems",    desc: "Convert & calculate across bases",  path: "/number-systems/calculator",     color: COLORS.green  },
             { icon: "≡", label: "Flip-Flops",        desc: "Sequential circuit deep dive",      path: "/sequential/flip-flops",         color: COLORS.amber  },
             { icon: "∿", label: "Timing Diagrams",   desc: "Visualise signal propagation",      path: "/timing-diagrams",               color: COLORS.cyan   },
-            { icon: "✦", label: "Problems",          desc: "Practice & reinforce concepts",     path: "/problems",                      color: COLORS.pink   },
+            { icon: "✦", label: "DLD Problems",      desc: "Practice & reinforce concepts",     path: "/problems",                      color: COLORS.pink   },
           ];
 
-          const SIGNAL_TOPICS = [
-            { label: "Boolean",    pct: topicStats.booleanAlgebra, color: COLORS.blue   },
-            { label: "K-Map",      pct: topicStats.kmap,           color: COLORS.purple },
-            { label: "Sequential", pct: topicStats.sequential,     color: COLORS.green  },
-            { label: "Numbers",    pct: topicStats.numberSystems,  color: COLORS.amber  },
-            { label: "Arithmetic", pct: topicStats.arithmetic,     color: COLORS.pink   },
+          const COAL_PORTALS = [
+            { icon: "📖", label: "COAL Theory",      desc: "All 7 parts — structured modules",  path: "/resources/coal/theory",         color: COLORS.purple },
+            { icon: "🔬", label: "COAL Practical",   desc: "Lab sessions & hands-on drills",    path: "/resources/coal/practical",      color: COLORS.cyan   },
+            { icon: "✦", label: "COAL Problems",     desc: "Conceptual practice questions",     path: "/resources/coal/problems",       color: COLORS.blue   },
+            { icon: "🖥️", label: "Assembly Drills",  desc: "x86 assembly drill exercises",      path: "/resources/coal/practical/assembly-drills", color: COLORS.amber },
+            { icon: "📍", label: "Addressing Modes", desc: "Interactive mode playground",       path: "/resources/coal/practical/addressing-mode-playground", color: COLORS.green },
+            { icon: "⚙️", label: "Instruction Lab",  desc: "Step through instruction execution",path: "/resources/coal/practical/instruction-laboratory", color: COLORS.indigo },
           ];
+
+          const PORTALS = activeSubject === "COAL" ? COAL_PORTALS : DLD_PORTALS;
+
+          const DLD_SIGNAL_TOPICS = [
+            { label: "Boolean",      pct: topicStats.booleanAlgebra, color: COLORS.blue   },
+            { label: "Numbers",      pct: topicStats.numberSystems,  color: COLORS.cyan   },
+            { label: "Arithmetic",   pct: topicStats.arithmetic,     color: COLORS.amber  },
+            { label: "Combinational",pct: topicStats.combinational,  color: COLORS.green  },
+            { label: "Sequential",   pct: topicStats.sequential,     color: COLORS.purple },
+            { label: "Registers",    pct: topicStats.registers,      color: COLORS.pink   },
+            { label: "Memory",       pct: topicStats.memorySystems,  color: COLORS.indigo },
+            { label: "Advanced",     pct: topicStats.advancedLogic,  color: COLORS.red    },
+          ];
+
+          const COAL_SIGNAL_TOPICS = [
+            { label: "Foundations", pct: coalTopicStats.foundations,   color: COLORS.purple },
+            { label: "Machine",     pct: coalTopicStats.machineCycle,  color: COLORS.cyan   },
+            { label: "ISA",         pct: coalTopicStats.isaAddressing, color: COLORS.blue   },
+            { label: "Assembly",    pct: coalTopicStats.assembly,      color: COLORS.amber  },
+            { label: "x86",         pct: coalTopicStats.x86Arch,       color: COLORS.indigo },
+            { label: "I/O",         pct: coalTopicStats.ioInterrupts,  color: COLORS.pink   },
+            { label: "Pipeline",    pct: coalTopicStats.perfPipeline,  color: COLORS.green  },
+          ];
+
+          const SIGNAL_TOPICS = activeSubject === "COAL" ? COAL_SIGNAL_TOPICS : DLD_SIGNAL_TOPICS;
+
+          const activeSolveCount  = activeSubject === "COAL" ? coalSolvedCount    : dldSolvedCount;
+          const activeAttemptAmt  = activeSubject === "COAL" ? coalAttemptedCount : dldAttemptedCount;
+          const activeAccuracy    = activeSolveCount > 0
+            ? Math.round((activeSolveCount / Math.max(activeAttemptAmt, 1)) * 100)
+            : 0;
 
           const STUDY_PLAN = [
             {
@@ -2387,17 +2525,22 @@ export default function ProfilePage() {
             },
             {
               phase: "02", label: "Solve",
-              task: `Attempt ${Math.max(1, 5 - (solvedCount % 5))} new problem${Math.max(1, 5 - (solvedCount % 5)) > 1 ? "s" : ""}`,
-              icon: "🎯", color: COLORS.blue, done: solvedCount > 0,
+              task: activeSubject === "COAL"
+                ? `Attempt ${Math.max(1, 5 - (coalSolvedCount % 5))} COAL problem${Math.max(1, 5 - (coalSolvedCount % 5)) > 1 ? "s" : ""}`
+                : `Attempt ${Math.max(1, 5 - (dldSolvedCount % 5))} new problem${Math.max(1, 5 - (dldSolvedCount % 5)) > 1 ? "s" : ""}`,
+              icon: "🎯", color: activeSubject === "COAL" ? COLORS.purple : COLORS.blue,
+              done: activeSolveCount > 0,
             },
             {
               phase: "03", label: "Explore",
-              task: completedTopics < 3 ? "Open an unvisited topic" : "Revisit a completed topic",
-              icon: "📖", color: COLORS.purple, done: completedTopics > 0,
+              task: activeCompletedTopics < 3
+                ? `Open an unvisited ${activeSubject === "COAL" ? "COAL part" : "topic"}`
+                : `Revisit a completed ${activeSubject === "COAL" ? "part" : "topic"}`,
+              icon: "📖", color: COLORS.purple, done: activeCompletedTopics > 0,
             },
             {
               phase: "04", label: "Reflect",
-              task: "Check your Skill tab — spot any gaps",
+              task: `Check your ${activeSubject} Skills tab — spot any gaps`,
               icon: "🔬", color: COLORS.green, done: false,
             },
           ];
@@ -2405,14 +2548,29 @@ export default function ProfilePage() {
           return (
             <div className="pd-section">
 
+              {/* ── Subject toggle ── */}
+              <div className="pd-subject-toggle-wrap">
+                <div className="pd-subject-toggle">
+                  <button type="button"
+                    className={`pd-subject-pill${activeSubject === "DLD" ? " pd-subject-pill--active pd-subject-pill--dld" : ""}`}
+                    onClick={() => setActiveSubject("DLD")}>⚡ DLD</button>
+                  <button type="button"
+                    className={`pd-subject-pill${activeSubject === "COAL" ? " pd-subject-pill--active pd-subject-pill--coal" : ""}`}
+                    onClick={() => setActiveSubject("COAL")}>🖥️ COAL</button>
+                </div>
+                <span className="pd-subject-toggle-label">
+                  {activeSubject === "COAL" ? "Computer Organization & Assembly Language" : "Digital Logic Design"}
+                </span>
+              </div>
+
               {/* ── Status strip ── */}
               <div className="eng-status-strip">
                 {[
-                  { label: "Active Days",     value: activeDays,          icon: "📅", color: COLORS.blue   },
-                  { label: "Current Streak",  value: `${streakCurrent}d`, icon: "🔥", color: COLORS.amber  },
-                  { label: "Best Streak",     value: `${streakLongest}d`, icon: "⚡", color: COLORS.purple },
-                  { label: "Accuracy",        value: accuracy > 0 ? `${accuracy}%` : "—", icon: "🎯", color: COLORS.green  },
-                  { label: "Problems Solved", value: solvedCount,          icon: "✅", color: COLORS.cyan   },
+                  { label: "Active Days",     value: activeDays,                        icon: "📅", color: COLORS.blue   },
+                  { label: "Current Streak",  value: `${streakCurrent}d`,               icon: "🔥", color: COLORS.amber  },
+                  { label: "Best Streak",     value: `${streakLongest}d`,               icon: "⚡", color: COLORS.purple },
+                  { label: "Accuracy",        value: activeAccuracy > 0 ? `${activeAccuracy}%` : "—", icon: "🎯", color: COLORS.green },
+                  { label: `${activeSubject} Solved`, value: activeSolveCount,          icon: "✅", color: COLORS.cyan   },
                 ].map((s) => (
                   <div key={s.label} className="eng-status-pill" style={{ "--pill-color": s.color }}>
                     <span className="eng-status-icon">{s.icon}</span>
@@ -2495,7 +2653,11 @@ export default function ProfilePage() {
               <div className="eng-portals-wrap">
                 <div className="eng-portals-header">
                   <h2 className="eng-section-title">Quick Launch</h2>
-                  <p className="eng-section-sub">Jump straight into any tool</p>
+                  <p className="eng-section-sub">
+                    {activeSubject === "COAL"
+                      ? "Jump into COAL labs, theory, and problems"
+                      : "Jump straight into any DLD tool"}
+                  </p>
                 </div>
                 <div className="eng-portals-grid">
                   {PORTALS.map((p) => (
