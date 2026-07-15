@@ -126,8 +126,16 @@ function DlsMentorWidget() {
     });
   }, [selectedTopic]);
 
-   useEffect(() => {
-    const timer = setTimeout(() => setShowIntroIcon(false), 1500);
+useEffect(() => {
+    let timer;
+    const cycle = () => {
+      setShowIntroIcon((prev) => {
+        const next = !prev;
+        timer = setTimeout(cycle, next ? 1000 : 3000);
+        return next;
+      });
+    };
+    timer = setTimeout(cycle, 1500);
     return () => clearTimeout(timer);
   }, []);
 
